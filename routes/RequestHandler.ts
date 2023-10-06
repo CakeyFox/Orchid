@@ -2,21 +2,6 @@ import express from 'express';
 import fs from 'fs';
 const router = express.Router();
 
-/* Public API  */
-
-router.get("/images/:commandName", (req, res) => {
-    const { commandName } = req.params;
-
-    try {
-        const commandFiles = fs.readdirSync(`./assets/commands/images/${commandName}`);
-        const asset = commandFiles[(Math.floor(Math.random() * commandFiles.length))]
-        res.send({ url: `https://api.foxybot.win/images/${commandName}/${asset}` });
-    } catch (e) {
-        res.status(404);
-        console.error(e)
-    }
-});
-
 router.get("/commands/get/:commandName", async (req, res) => {
     
 });
@@ -24,8 +9,6 @@ router.get("/commands/get/:commandName", async (req, res) => {
 router.get("/", (req, res) => {
     res.sendFile("index.html", { root: "./pages/" })
 })
-
-/* Private API */
 
 router.get("/user/get/:id/auth=:key", async (req, res) => {
     const { id, key } = req.params;
@@ -36,6 +19,25 @@ router.get("/user/get/:id/auth=:key", async (req, res) => {
         res.send({ error: "Invalid key" })
     }
 });
+
+
+router.get("/images/:commandName/auth=:key", (req, res) => {
+    const { commandName, key } = req.params;
+
+    if (key === process.env.AUTHORIZATION) {
+        try {
+            const commandFiles = fs.readdirSync(`./assets/commands/images/${commandName}`);
+            const asset = commandFiles[(Math.floor(Math.random() * commandFiles.length))]
+            res.send({ url: `https://api.foxybot.win/images/${commandName}/${asset}` });
+        } catch (e) {
+            res.status(404);
+            console.error(e)
+        }
+    } else {
+        res.send({ error: "Invalid key" })
+    }
+});
+
 
 router.get("/guild/get/:id/auth=:key", async (req, res) => {
     const { id, key } = req.params;
