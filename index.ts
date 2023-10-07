@@ -15,3 +15,11 @@ export { database };
 app.listen(8080, () => {
     console.info('[FOXY API] Server is running on port 8080')
 });
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[UNHANDLED REJECTION] Reason: ', reason);
+});
+
+process.on('uncaughtException', (error) => {
+    console.error('[UNCAUGHT EXCEPTION] Error: ', error);
+});
