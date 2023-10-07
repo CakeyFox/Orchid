@@ -1,4 +1,5 @@
 import bodyParser from 'body-parser';
+import { products } from '../structures/json/products.json';
 const stripe = require('stripe')(process.env.STRIPE_KEY);
 
 const router = require('express').Router();
@@ -10,32 +11,47 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
         case 'checkout.session.completed': {
             const session = event.data.object;
             const expandedSession = await stripe.checkout.sessions.retrieve(session.id, {
-                expand: ['line_items.data', 'customer', 'customer_details', 'custom_fields']
+                expand: ['line_items.data']
             });
 
-            await stripe.customers.update(session.customer, {
-                metadata: {
-                    discord_id: expandedSession.custom_fields[0].text.value
+            if (expandedSession.customer) {
+                await stripe.customers.update(session.customer, {
+                    metadata: {
+                        discord_id: expandedSession.custom_fields[0].text.value
+                    }
+                });
+            } else {
+                await stripe.customers.create({
+                    email: expandedSession.customer_details.email,
+                    metadata: {
+                        discord_id: expandedSession.custom_fields[0].text.value
+                    }
+                });
+            }
+
+            const product = () => {
+                const product = products.find(product => product.id === expandedSession.line_items.data[0].price.product);
+                return product;
+            }
+
+            switch (product().type) {
+                case 'subscription': {
+                    // TODO
                 }
-            });
-        
-            // TO DO: Add the premium to the user filtering by the Discord ID located in metadata
-            // TO DO: Add the product to the user filtering by the Discord ID located in metadata
+
+                case 'one-time': {
+                    // TODO
+                }
+            }
         }
 
         case 'customer.subscription.deleted': {
             const subscription = event.data.object;
             const customer = await stripe.customers.retrieve(subscription.customer, {
-                expand: ['subscriptions', 'customer', 'customer_details', 'custom_fields']
+                expand: ['subscriptions']
             });
 
-            console.log({
-                "comprador": customer.customer_details.name,
-                "ID da conta Discord": customer.custom_fields[0].text.value,
-                "Produto": subscription.plan.nickname,
-                "ID do Produto": subscription.plan.product,
-                "ID do customer": subscription.customer,
-            });
+            console.log(customer);
             // TO DO: When the subscription ends, remove the premium from the user filtering by the Discord ID located in metadata
         }
     }
