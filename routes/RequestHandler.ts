@@ -42,7 +42,7 @@ router.get("/images/:commandName", (req, res) => {
 });
 
 
-router.get("/guild/get/:id/auth=:key", async (req, res) => {
+router.get("/guild/get/:id", async (req, res) => {
     const { id } = req.params;
     const key = req.header("Authorization");
     if (key === process.env.AUTHORIZATION) {
@@ -53,15 +53,15 @@ router.get("/guild/get/:id/auth=:key", async (req, res) => {
     }
 });
 
-router.get('/backgrounds/get/:id/auth=:key', async (req, res) => {
+router.get('/backgrounds/get/:id', async (req, res) => {
 
 });
 
-router.get('/layouts/get/:id/auth=:key', async (req, res) => {
+router.get('/layouts/get/:id', async (req, res) => {
 
 });
 
-router.get('/masks/get/:id/auth=:key', async (req, res) => {
+router.get('/masks/get/:id', async (req, res) => {
 
 });
 
