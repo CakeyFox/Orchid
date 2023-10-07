@@ -1,0 +1,37 @@
+{
+    "products": [
+        {
+            "id": "prod_OlrkXfCvk8jUgT",
+            "name": "Foxy Essentials",
+            "type": "subscription",
+            "cakes": 10000
+        },
+        {
+            "id": "prod_OlrkuVU1pfAXoc",
+            "name": "Foxy Pro",
+            "type": "subscription",
+            "cakes": 25000
+        },
+        {
+            "id": "prod_OlrmMViNGaSsj1",
+            "name": "Foxy Turbo",
+            "type": "subscription",
+            "cakes": 50000
+        },
+        {
+            "id": "prod_OlwUnnuqfXs8Uf",
+            "name": "100.000 Cakes",
+            "type": "one-time"
+        },
+        {
+            "id": "prod_OlwVjdZCBgDYOx",
+            "name": "300.000 Cakes",
+            "type": "one-time"
+        },
+        {
+            "id": "prod_OlwVOozohkSJkb",
+            "name": "1.000.000 Cakes",
+            "type": "one-time"
+        }
+    ]
+}
