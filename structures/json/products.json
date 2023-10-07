@@ -21,17 +21,26 @@
         {
             "id": "prod_OlwUnnuqfXs8Uf",
             "name": "100.000 Cakes",
+            "cakes": 100000,
             "type": "one-time"
         },
         {
             "id": "prod_OlwVjdZCBgDYOx",
             "name": "300.000 Cakes",
+            "cakes": 300000,
             "type": "one-time"
         },
         {
             "id": "prod_OlwVOozohkSJkb",
             "name": "1.000.000 Cakes",
+            "cakes": 1000000,
             "type": "one-time"
+        },
+        {
+            "id": "prod_OmFIIIFwBKnio8",
+            "name": "premium",
+            "type": "subscription",
+            "cakes": 10000
         }
     ]
 }
