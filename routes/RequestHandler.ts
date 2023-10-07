@@ -1,5 +1,6 @@
 import express from 'express';
 import fs from 'fs';
+import { database } from '..';
 const router = express.Router();
 
 router.get("/commands/get/:commandName", async (req, res) => {
@@ -14,7 +15,8 @@ router.get("/user/get/:id/auth=:key", async (req, res) => {
     const { id, key } = req.params;
 
     if (key === process.env.AUTHORIZATION) {
-        res.send({ id: id, username: "WinG4merBR", discriminator: "000" })
+        const user = await database.getUser(id);
+        res.send(user);
     } else {
         res.send({ error: "Invalid key" })
     }
@@ -43,7 +45,8 @@ router.get("/guild/get/:id/auth=:key", async (req, res) => {
     const { id, key } = req.params;
 
     if (key === process.env.AUTHORIZATION) {
-        res.send({ id: id, name: "FoxyBot", icon: "https://cdn.discordapp.com/avatars/743020107474745344/5a5c2b4d4a2a5b1c6f3c9d9c5d3b0e3e.png" })
+        const guild = await database.getGuild(id);
+        res.send(guild);
     } else {
         res.send({ error: "Invalid key" })
     }
