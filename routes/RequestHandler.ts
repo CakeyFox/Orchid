@@ -4,17 +4,18 @@ import { database } from '..';
 const router = express.Router();
 
 router.get("/commands/get/:commandName", async (req, res) => {
-    
+
 });
 
 router.get("/", (req, res) => {
     res.sendFile("index.html", { root: "./pages/" })
 })
 
-router.get("/user/get/:id/auth=:key", async (req, res) => {
-    const { id, key } = req.params;
+router.get("/user/get/:id", async (req, res) => {
+    const { id } = req.params;
+    const token = req.header("Authorization");
 
-    if (key === process.env.AUTHORIZATION) {
+    if (token === process.env.AUTHORIZATION) {
         const user = await database.getUser(id);
         res.send(user);
     } else {
@@ -23,9 +24,9 @@ router.get("/user/get/:id/auth=:key", async (req, res) => {
 });
 
 
-router.get("/images/:commandName/auth=:key", (req, res) => {
-    const { commandName, key } = req.params;
-
+router.get("/images/:commandName", (req, res) => {
+    const { commandName } = req.params;
+    const key = req.header("Authorization");
     if (key === process.env.AUTHORIZATION) {
         try {
             const commandFiles = fs.readdirSync(`./assets/commands/images/${commandName}`);
@@ -42,8 +43,8 @@ router.get("/images/:commandName/auth=:key", (req, res) => {
 
 
 router.get("/guild/get/:id/auth=:key", async (req, res) => {
-    const { id, key } = req.params;
-
+    const { id } = req.params;
+    const key = req.header("Authorization");
     if (key === process.env.AUTHORIZATION) {
         const guild = await database.getGuild(id);
         res.send(guild);
