@@ -37,12 +37,16 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
             switch (product().type) {
                 case 'subscription': {
                     // TODO
+                    break;
                 }
 
                 case 'one-time': {
                     // TODO
+                    break;
                 }
             }
+
+            break;
         }
 
         case 'customer.subscription.deleted': {
@@ -53,6 +57,8 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
 
             console.log(customer);
             // TO DO: When the subscription ends, remove the premium from the user filtering by the Discord ID located in metadata
+        
+            break;
         }
     }
 });
