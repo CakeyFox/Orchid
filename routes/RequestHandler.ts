@@ -19,7 +19,7 @@ router.get("/user/get/:id", async (req, res) => {
         const user = await database.getUser(id);
         res.send(user);
     } else {
-        res.send({ error: "Invalid key" })
+        res.status(401).send({ error: "Invalid key" });
     }
 });
 
@@ -37,7 +37,7 @@ router.get("/images/:commandName", (req, res) => {
             console.error(e)
         }
     } else {
-        res.send({ error: "Invalid key" })
+        res.status(401).send({ error: "Invalid key" });
     }
 });
 
@@ -49,7 +49,7 @@ router.get("/guild/get/:id/auth=:key", async (req, res) => {
         const guild = await database.getGuild(id);
         res.send(guild);
     } else {
-        res.send({ error: "Invalid key" })
+        res.status(401).send({ error: "Invalid key" });
     }
 });
 
