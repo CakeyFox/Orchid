@@ -17,7 +17,8 @@
     "mongoose": "^7.5.4",
     "node-fetch": "^3.3.2",
     "node-fetch-commonjs": "^3.3.2",
-    "stripe": "^13.9.0"
+    "stripe": "^13.9.0",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.8.2",

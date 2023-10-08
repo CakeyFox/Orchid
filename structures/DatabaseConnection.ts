@@ -1,12 +1,14 @@
 import mongoose, { ConnectOptions } from 'mongoose';
 import { logger } from '../utils/logger';
 import { bot } from '../utils/discord/FoxyClient';
+import uuid from 'uuid';
 
 export default class DatabaseConnection {
     private client: any;
     private user: any;
     private commands: any;
     private guilds: any;
+    private key: any;
 
     constructor(client) {
         mongoose.set("strictQuery", true)
@@ -17,6 +19,12 @@ export default class DatabaseConnection {
             logger.error(`Failed to connect to database: `, error);
         });
         logger.info(`[DATABASE] Connected to database!`);
+        const keySchema = new mongoose.Schema({
+            key: String,
+            used: Boolean,
+            user: String,
+            expiresAt: Date,
+        });
         const trasactionSchema = new mongoose.Schema({
             to: String,
             from: String,
@@ -82,6 +90,7 @@ export default class DatabaseConnection {
         this.user = mongoose.model('user', userSchema);
         this.commands = mongoose.model('commands', commandsSchema);
         this.guilds = mongoose.model('guilds', guildSchema);
+        this.key = mongoose.model('key', keySchema);
         this.client = client;
     }
 
@@ -213,6 +222,21 @@ export default class DatabaseConnection {
         return document;
     }
 
+    async registerKey(user: String, expiresAt: Date) {
+        const key = uuid.v4();
+
+        const document = this.key.findOne({ key: key });
+
+        if (document) {
+            if (document.user === user) {
+                document.expiresAt = expiresAt;
+                document.save();
+                return document;
+            }
+        }
+
+        return document;
+    }
     async getAllUsers(): Promise<void> {
         let usersData = await this.user.find({});
         return usersData.map(user => user.toJSON());
