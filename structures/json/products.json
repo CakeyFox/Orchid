@@ -5,21 +5,21 @@
             "name": "Foxy Essentials",
             "type": "subscription",
             "pType": 1,
-            "cakes": 10000
+            "cakes": 100000
         },
         {
             "id": "prod_OlrkuVU1pfAXoc",
             "name": "Foxy Pro",
             "type": "subscription",
             "pType": 2,
-            "cakes": 25000
+            "cakes": 300000
         },
         {
             "id": "prod_OlrmMViNGaSsj1",
             "name": "Foxy Turbo",
             "type": "subscription",
             "pType": 3,
-            "cakes": 50000
+            "cakes": 500000
         },
         {
             "id": "prod_OlwUnnuqfXs8Uf",
@@ -43,7 +43,8 @@
             "id": "prod_OmFIIIFwBKnio8",
             "name": "premium",
             "type": "subscription",
-            "cakes": 10000
+            "cakes": 10000,
+            "pType": 1
         }
     ]
 }
