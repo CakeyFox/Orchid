@@ -1,8 +1,7 @@
 import mongoose, { ConnectOptions } from 'mongoose';
 import { logger } from '../utils/logger';
 import { bot } from '../utils/discord/FoxyClient';
-import uuid from 'uuid';
-
+const { v4: uuidv4 } = require('uuid');
 export default class DatabaseConnection {
     private client: any;
     private user: any;
@@ -24,7 +23,8 @@ export default class DatabaseConnection {
             used: Boolean,
             user: String,
             expiresAt: Date,
-        });
+            pType: Number,
+        }, { versionKey: false, id: false });
         const trasactionSchema = new mongoose.Schema({
             to: String,
             from: String,
@@ -32,7 +32,7 @@ export default class DatabaseConnection {
             date: Date,
             received: Boolean,
             type: String,
-        });
+        }, { versionKey: false, id: false } );
         const userSchema = new mongoose.Schema({
             _id: String,
             userCreationTimestamp: Date,
@@ -222,20 +222,28 @@ export default class DatabaseConnection {
         return document;
     }
 
-    async registerKey(user: String, expiresAt: Date) {
-        const key = uuid.v4();
+    async registerKey(user: String, expiresAt: Date, pType: Number) {
+        const key = uuidv4();
 
-        const document = this.key.findOne({ key: key });
+        const document = await this.key.findOne({ key: key });
 
         if (document) {
             if (document.user === user) {
                 document.expiresAt = expiresAt;
-                document.save();
+                document.pType = pType;
+                await document.save();
                 return document;
             }
+        } else {
+            const newKey = await new this.key({
+                key: key,
+                used: false,
+                user: user,
+                expiresAt: expiresAt,
+                pType: pType,
+            }).save();
+            return newKey;
         }
-
-        return document;
     }
     async getAllUsers(): Promise<void> {
         let usersData = await this.user.find({});

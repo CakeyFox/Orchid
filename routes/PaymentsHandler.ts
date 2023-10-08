@@ -40,6 +40,10 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
             switch (product().type) {
                 case 'subscription': {
                     const user = await database.getUser(expandedSession.custom_fields[0].text.value);
+                    const date = new Date();
+                    date.setMonth(date.getMonth() + 1);
+
+                    const guildPremium = await database.registerKey(expandedSession.custom_fields[0].text.value, date, product().pType);
                     user.premiumType = product().pType;
                     user.premiumDate = Date.now();
                     user.transactions.push({
@@ -56,7 +60,7 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                                 rest.sendDirectMessage(expandedSession.custom_fields[0].text.value, {
                                     embeds: [{
                                         title: "Obrigada por me ajudar a ficar online, yay!",
-                                        description: `Muito obrigada por comprar **${product().name}**! Você não sabe o quanto isso me ajuda (a comprar comida) e me manter online, como forma de dizer que você é uma pessoa fofa sem dizer de forma direta, você ganhou **${product().cakes.toLocaleString('pt-BR')} Cakes**! Muito obrigada! <:foxy_pray:1084184966998536303>`,
+                                        description: `Muito obrigada por comprar **${product().name}**! Você não sabe o quanto isso me ajuda (a comprar comida) e me manter online, como forma de dizer que você é uma pessoa fofa sem dizer de forma direta, você ganhou **${product().cakes.toLocaleString('pt-BR')} Cakes**! Muito obrigada! <:foxy_pray:1084184966998536303> \n\nOpa! Já ia me esquecendo! Aqui está a key de ativação para você ativar os recursos premium no seu servidor! \`\`\`${guildPremium.key}\`\`\``,
                                         color: 0xe7385d,
                                         image: {
                                             url: "https://cdn.discordapp.com/attachments/1078322762550083736/1160621235525386240/tier1.png?ex=653553c1&is=6522dec1&hm=551a4cb84dd192c574913931f8c8da883c14c7cdecfbada03677d230b9f042cc&"
@@ -74,7 +78,7 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                                 rest.sendDirectMessage(expandedSession.custom_fields[0].text.value, {
                                     embeds: [{
                                         title: "Obrigada por me ajudar a ficar online, yay!",
-                                        description: `Yay! Obriada por comprar o **${product().name}**! Como forma de gratidão por me ajudar a comprar mais bolo, você ganhou **${product().cakes} Cakes. Muito obrigada seu fofo(a)!`,
+                                        description: `Yay! Obriada por comprar o **${product().name}**! Como forma de gratidão por me ajudar a comprar mais bolo, você ganhou **${product().cakes} Cakes. Muito obrigada seu fofo(a)! Opa! Já ia me esquecendo! Aqui está a key de ativação para você ativar os recursos premium no seu servidor! \`\`\`${guildPremium.key}\`\`\``,
                                         color: 0xe7385d,
                                         image: {
                                             url: "https://cdn.discordapp.com/attachments/1078322762550083736/1160621235751895050/tier2.png?ex=653553c1&is=6522dec1&hm=a930bd666db85c864c7773f57d40d68a795e02e9fae0cc5e0d44f382f5d71390&"
@@ -92,7 +96,7 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                                 rest.sendDirectMessage(expandedSession.custom_fields[0].text.value, {
                                     embeds: [{
                                         title: "Obrigada por me ajudar a ficar online, yay!",
-                                        description: `Você... Comprou ${product().name}! só para me ajudar? Não tenho como descrever o quando você me ajudou com isso... Como forma de gratidão, que ainda sim não se compara a essa ajuda, você recebeu **${product().cakes} Cakes**. Muito obrigada, de verdade <:foxy_cry:1071151976504627290>`,
+                                        description: `Você... Comprou ${product().name}! só para me ajudar? Não tenho como descrever o quando você me ajudou com isso... Como forma de gratidão, que ainda sim não se compara a essa ajuda, você recebeu **${product().cakes} Cakes**. Muito obrigada, de verdade <:foxy_cry:1071151976504627290>! Opa! Já ia me esquecendo! Aqui está a key de ativação para você ativar os recursos premium no seu servidor! \`\`\`${guildPremium.key}\`\`\``,
                                         color: 0xe7385d,
                                         image: {
                                             url: "https://cdn.discordapp.com/attachments/1078322762550083736/1160621236003549184/tier3.png?ex=653553c1&is=6522dec1&hm=9c05baa69551f32f03b2265d85c371e2faebf03c8043964000b131fb564a4667&"
