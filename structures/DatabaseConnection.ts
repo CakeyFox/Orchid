@@ -85,7 +85,7 @@ export default class DatabaseConnection {
         this.client = client;
     }
 
-    async getUser(userId: any): Promise<void> {
+    async getUser(userId: any): Promise<any> {
         const user = await bot.helpers.getUser(userId)
 
         if (!user) return null;
