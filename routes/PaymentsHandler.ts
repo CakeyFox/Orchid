@@ -158,8 +158,8 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
             user.save();
             rest.sendDirectMessage(customer.metadata.discord_id, {
                 embeds: [{
-                    title: "<:foxy_cry:1071151976504627290> **|** Seu premium foi cancelado!",
-                    description: "Seu premium foi cancelado, pensei que éramos amigos <:foxy_cry:1071151976504627290>!"
+                    title: "<:foxy_cry:1071151976504627290> **|** Sua assinatura foi cancelada!",
+                    description: "A sua assinatura foi cancelada, você não pode mais utilizar os benefícios relacionados ao seu plano <:foxy_cry:1071151976504627290>!"
                 }]
             });
             break;
@@ -176,11 +176,8 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
             if (reason === 'cancellation_requested') {
                 rest.sendDirectMessage(customer.metadata.discord_id, {
                     embeds: [{
-                        title: "<:foxy_cry:1071151976504627290> **|** Sua assinatura foi cancelada!",
-                        description: "Seu premium foi cancelado, pensei que éramos amigos <:foxy_cry:1071151976504627290>!",
-                        footer: {
-                            text: "O plano será cancelado, mas continuará disponível até o fim do período de faturamento"
-                        }
+                        title: "<:foxy_cry:1071151976504627290> **|** Você solicitou cancelamento da sua assinatura!",
+                        description: "A sua assinatura será cancelada, mas estará disponível até a data do próximo faturamento! Pensei que éramos amigos <:foxy_cry:1071151976504627290>",
                     }]
                 });
 
