@@ -224,7 +224,7 @@ export default class DatabaseConnection {
 
     async registerKey(user: String, expiresAt: Date, pType: Number) {
         const key = uuidv4();
-
+        
         const document = await this.key.findOne({ key: key });
 
         if (document) {

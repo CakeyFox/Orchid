@@ -41,9 +41,13 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                 case 'subscription': {
                     const user = await database.getUser(expandedSession.custom_fields[0].text.value);
                     const date = new Date();
+                    let guildPremium;
                     date.setMonth(date.getMonth() + 1);
 
-                    const guildPremium = await database.registerKey(expandedSession.custom_fields[0].text.value, date, product().pType);
+                    if (product().pType !== 1) {
+                        guildPremium = await database.registerKey(expandedSession.custom_fields[0].text.value, date, product().pType);
+                        console.log(product().pType)
+                    }
                     user.premiumType = product().pType;
                     user.premiumDate = Date.now();
                     user.transactions.push({
@@ -60,7 +64,7 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                                 rest.sendDirectMessage(expandedSession.custom_fields[0].text.value, {
                                     embeds: [{
                                         title: "Obrigada por me ajudar a ficar online, yay!",
-                                        description: `Muito obrigada por comprar **${product().name}**! Você não sabe o quanto isso me ajuda (a comprar comida) e me manter online, como forma de dizer que você é uma pessoa fofa sem dizer de forma direta, você ganhou **${product().cakes.toLocaleString('pt-BR')} Cakes**! Muito obrigada! <:foxy_pray:1084184966998536303> \n\nOpa! Já ia me esquecendo! Aqui está a key de ativação para você ativar os recursos premium no seu servidor! \`\`\`${guildPremium.key}\`\`\``,
+                                        description: `Muito obrigada por comprar **${product().name}**! Você não sabe o quanto isso me ajuda (a comprar comida) e me manter online, como forma de dizer que você é uma pessoa fofa sem dizer de forma direta, você ganhou **${product().cakes.toLocaleString('pt-BR')} Cakes**! Muito obrigada! <:foxy_pray:1084184966998536303>`,
                                         color: 0xe7385d,
                                         image: {
                                             url: "https://cdn.discordapp.com/attachments/1078322762550083736/1160621235525386240/tier1.png?ex=653553c1&is=6522dec1&hm=551a4cb84dd192c574913931f8c8da883c14c7cdecfbada03677d230b9f042cc&"

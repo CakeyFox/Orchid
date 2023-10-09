@@ -44,7 +44,7 @@
             "name": "premium",
             "type": "subscription",
             "cakes": 10000,
-            "pType": 1
+            "pType": 2
         }
     ]
 }
