@@ -1,6 +1,8 @@
 import express from 'express';
 import fs from 'fs';
 import { database } from '..';
+import bodyParser from 'body-parser';
+
 const router = express.Router();
 
 router.get("/commands/get/:commandName", async (req, res) => {

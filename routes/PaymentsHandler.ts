@@ -151,7 +151,6 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                 expand: ['subscriptions']
             });
 
-            console.log(customer);
             const user = await database.getUser(customer.metadata.discord_id);
             user.premiumType = null;
             user.premiumDate = null;
@@ -164,6 +163,29 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                 }]
             });
             break;
+        }
+
+        case 'customer.subscription.updated': {
+            const subscription = event.data.object;
+            const customer = await stripe.customers.retrieve(subscription.customer, {
+                expand: ['subscriptions']
+            });
+
+            const reason = subscription.cancellation_details.reason;
+
+            if (reason === 'cancellation_requested') {
+                rest.sendDirectMessage(customer.metadata.discord_id, {
+                    embeds: [{
+                        title: "<:foxy_cry:1071151976504627290> **|** Sua assinatura foi cancelada!",
+                        description: "Seu premium foi cancelado, pensei que éramos amigos <:foxy_cry:1071151976504627290>!",
+                        footer: {
+                            text: "O plano será cancelado, mas continuará disponível até o fim do período de faturamento"
+                        }
+                    }]
+                });
+
+                break;
+            }
         }
     }
 });
