@@ -7,6 +7,7 @@
   "license": "GPL-3.0",
   "private": true,
   "dependencies": {
+    "@top-gg/sdk": "^3.1.6",
     "axios": "^1.5.1",
     "body-parser": "^1.20.2",
     "discordeno": "^18.0.1",
