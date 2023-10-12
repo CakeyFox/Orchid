@@ -6,7 +6,7 @@ const app: Application = express();
 const database = new DatabaseConnection(bot);
 
 require('dotenv').config();
-// app.use('/', require('./routes/RequestHandler'));
+app.use('/', require('./routes/RequestHandler'));
 app.use('/', require('./routes/PaymentsHandler'));
 app.use('/memes', express.static('./assets/commands/images/memes'));
 app.use('/images', express.static('./assets/commands/images'));
