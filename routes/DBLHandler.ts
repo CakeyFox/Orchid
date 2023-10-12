@@ -7,7 +7,6 @@ const webhook = new dbl.Webhook(process.env.DBL_TOKEN);
 
 router.post('/dblwebhook', webhook.listener(async (vote) => {
     const user = await database.getUser(vote.user);
-
     if (!user) return;
 
     try {
@@ -28,7 +27,7 @@ router.post('/dblwebhook', webhook.listener(async (vote) => {
         console.error(err);
     }
 
-    user.balance += 1000;
+    user.balance += 1500;
     await user.save();
 }));
 
