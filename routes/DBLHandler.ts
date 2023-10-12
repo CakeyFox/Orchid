@@ -1,6 +1,6 @@
 import { database } from '..';
 import { rest } from '../utils/discord/FoxyClient';
-import dbl from '@top-gg/sdk';
+const dbl = require('@top-gg/sdk');
 const router = require('express').Router();
 
 const webhook = new dbl.Webhook(process.env.DBL_TOKEN);
@@ -29,3 +29,5 @@ router.post('/dbl/webhook', webhook.listener(async (vote) => {
     user.balance += 1000;
     await user.save();
 }));
+
+module.exports = router;
