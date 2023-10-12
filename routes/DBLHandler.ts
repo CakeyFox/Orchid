@@ -5,7 +5,7 @@ const router = require('express').Router();
 
 const webhook = new dbl.Webhook(process.env.DBL_TOKEN);
 
-router.post('/dbl/webhook', webhook.listener(async (vote) => {
+router.post('/dblwebhook', webhook.listener(async (vote) => {
     const user = await database.getUser(vote.user);
 
     if (!user) return;
