@@ -24,7 +24,9 @@ router.post('/dblwebhook', webhook.listener(async (vote) => {
                     }
                 }]
         });
-    } catch (err) { }
+    } catch (err) {
+        console.error(err);
+    }
 
     user.balance += 1000;
     await user.save();
