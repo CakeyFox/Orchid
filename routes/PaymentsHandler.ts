@@ -51,8 +51,11 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                     user.premiumDate = Date.now();
                     user.transactions.push({
                         type: 'premiumPerk',
-                        amount: product().cakes,
-                        timestamp: Date.now()
+                        to: expandedSession.custom_fields[0].text.value,
+                        from: 'Foxy',
+                        date: Date.now(),
+                        received: true,
+                        quantity: product().cakes
                     });
                     user.balance += product().cakes;
                     user.premium = true;
@@ -122,8 +125,11 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                     user.balance += product().cakes;
                     user.transactions.push({
                         type: 'bought',
-                        amount: product().cakes,
-                        timestamp: Date.now()
+                        to: expandedSession.custom_fields[0].text.value,
+                        from: 'Foxy',
+                        date: Date.now(),
+                        received: true,
+                        quantity: product().cakes
                     });
                     user.save();
                     try {
