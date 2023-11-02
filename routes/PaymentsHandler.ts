@@ -10,6 +10,8 @@ const router = require('express').Router();
 router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
     const event = JSON.parse(req.body.toString());
     const sig = req.headers['stripe-signature'];
+    res.status(200).send();
+
     switch (event.type) {
         case 'checkout.session.completed': {
             const session = event.data.object;
