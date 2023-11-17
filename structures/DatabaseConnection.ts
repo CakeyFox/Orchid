@@ -245,6 +245,17 @@ export default class DatabaseConnection {
             return newKey;
         }
     }
+
+    async getKey(userId: string) {
+        const document = await this.key.findOne({ user: userId });
+
+        if (document) {
+            return document;
+        } else {
+            return null;
+        }
+    }
+
     async getAllUsers(): Promise<void> {
         let usersData = await this.user.find({});
         return usersData.map(user => user.toJSON());
