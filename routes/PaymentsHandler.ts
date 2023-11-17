@@ -192,6 +192,23 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                 break;
             }
         }
+
+        case 'invoice.payment_suceeded': {
+            const invoice = event.data.object;
+            if (invoice.billing_reason === "subscription_cycle") {
+                const customer = await stripe.customers.retrieve(invoice.customer, {
+                    expand: ['subscriptions']
+                });
+
+                const user = await database.getUser(customer.metadata.discord_id);
+                const guildKey = await database.getKey(user._id);
+
+                user.premiumExpiration = Date.now() + 2592000000;
+                guildKey.expiresAt = Date.now() + 2592000000;
+                await user.save();
+                await guildKey.save();
+            }
+        }
     }
 });
 
