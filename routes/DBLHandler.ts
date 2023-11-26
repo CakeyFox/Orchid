@@ -28,6 +28,14 @@ router.post('/dblwebhook', webhook.listener(async (vote) => {
     } catch (err) { }
 
     user.balance += 1500;
+    user.transactions.push({
+        from: "Foxy",
+        to: vote.user,
+        quantity: 1500,
+        date: new Date(),
+        type: "voteReward"
+    });
+    
     await user.save();
 }));
 
