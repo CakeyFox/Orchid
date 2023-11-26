@@ -9,9 +9,8 @@ require('dotenv').config();
 app.use('/', require('./routes/RequestHandler'));
 app.use('/', require('./routes/PaymentsHandler'));
 app.use('/', require('./routes/DBLHandler'));
-app.use('/memes', express.static('./assets/commands/images/memes'));
-app.use('/images', express.static('./assets/commands/images'));
-
+app.use('/memes', express.static('assets/commands/memes'));
+app.use('/images', express.static('assets/commands/images'));
 export { database };
 
 app.listen(8080, () => {
