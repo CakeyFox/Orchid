@@ -160,6 +160,23 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
             });
 
             const user = await database.getUser(customer.metadata.discord_id);
+            const guildKey = await database.getKey(user._id);
+            const guild = await database.getGuild(guildKey.activatedAt);
+            const modules = [
+                { name: 'AutoRoleModule', property: 'roles', maxLength: 5 },
+                { name: 'InviteBlockerModule', property: 'whistelistedRoles', maxLength: 5 },
+                { name: 'InviteBlockerModule', property: 'whistelistedChannels', maxLength: 5 }
+            ];
+            
+            for (const module of modules) {
+                const propertyLength = guild[module.name][module.property].length;
+                
+                if (propertyLength > module.maxLength) {
+                    guild[module.name][module.property] = guild[module.name][module.property].slice(0, module.maxLength);
+                    await guild.save();
+                }
+            }
+                        
             user.premiumType = null;
             user.premiumDate = null;
             user.premium = false;
