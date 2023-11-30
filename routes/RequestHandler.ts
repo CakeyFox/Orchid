@@ -2,6 +2,9 @@ import express from 'express';
 import fs from 'fs';
 import { database } from '..';
 import { lylist, masks, bglist } from '../structures/json/profileAssets.json';
+import fetch from 'node-fetch-commonjs';
+
+const request = require('request');
 
 const router = express.Router();
 router.get("/", (req, res) => {
@@ -91,4 +94,83 @@ router.get("/profileAssets", (req, res) => {
     res.send({ masks, bglist, lylist });
 });
 
+router.get("/key/:id", async (req, res) => {
+    const { id } = req.params;
+    const key = req.header("Authorization");
+    if (key === process.env.AUTHORIZATION) {
+        const keyInfo = await database.getKey(id);
+        if (keyInfo) {
+            return res.send({ status: 200, keyInfo });
+        } else {
+            return res.status(404).send({ status: 404, error: "This key doesn't exist" })
+        }
+    } else {
+        return res.status(401).send({ error: "Invalid key" });
+    }
+});
+
+router.get("/rso/auth/callback", async (req, res) => {
+    const code = req.query.code;
+    request.post({
+        url: "https://auth.riotgames.com/token",
+        auth: {
+            user: process.env.RSO_CLIENT_ID,
+            pass: process.env.RSO_CLIENT_SECRET
+        },
+        form: {
+            grant_type: "authorization_code",
+            code: code,
+            redirect_uri: process.env.RSO_REDIRECT_URI
+        }
+    }, async function (err, httpResponse, body) {
+        if (err) {
+            console.error(err);
+            return res.status(500).send({ error: "Internal server error" });
+        }
+        fetch("https://americas.api.riotgames.com/riot/account/v1/accounts/me", {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${JSON.parse(body).access_token}`,
+                'Accept-Encoding': 'gzip',
+            }
+        })
+            .then(async (response) => {
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const jsonData: any = await response.json();
+
+                const userData = await database.getUser(req.query.state);
+                async function getUUID(): Promise<any> {
+                        return fetch(`https://api.henrikdev.xyz/valorant/v1/account/${jsonData.gameName}/${jsonData.tagLine}`, {
+                            headers: {
+                                "Authentication": process.env.VALORANT_API
+                            }
+                        }).then(res => res.json());
+
+                }
+                userData.riotAccount = {
+                    isLinked: true,
+                    puuid: (await getUUID()).data.puuid,
+                    isPrivate: false,
+                    region: null,
+                    access_token: JSON.parse(body).access_token,
+                }
+
+                await userData.save();
+                res.send({ message: "Account linked successfully" });
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                res.status(500).send({ message: "Internal server error" });
+            });
+
+    });
+});
+
+router.get("/rso/logout", async (req, res) => {
+    // todo
+});
 export = router;
