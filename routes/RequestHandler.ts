@@ -144,11 +144,11 @@ router.get("/rso/auth/callback", async (req, res) => {
 
                 const userData = await database.getUser(req.query.state);
                 async function getUUID(): Promise<any> {
-                        return fetch(`https://api.henrikdev.xyz/valorant/v1/account/${jsonData.gameName}/${jsonData.tagLine}`, {
-                            headers: {
-                                "Authentication": process.env.VALORANT_API
-                            }
-                        }).then(res => res.json());
+                    return fetch(`https://api.henrikdev.xyz/valorant/v1/account/${jsonData.gameName}/${jsonData.tagLine}`, {
+                        headers: {
+                            "Authentication": process.env.VALORANT_API
+                        }
+                    }).then(res => res.json());
 
                 }
                 userData.riotAccount = {
@@ -160,11 +160,11 @@ router.get("/rso/auth/callback", async (req, res) => {
                 }
 
                 await userData.save();
-                res.send({ message: "Account linked successfully" });
+                res.status(200).redirect('https://foxybot.win/riot/connection/status=200')
             })
             .catch((error) => {
                 console.error('Error:', error);
-                res.status(500).send({ message: "Internal server error" });
+                res.status(500).redirect('https://foxybot.win/riot/connection/status=500');
             });
 
     });
