@@ -56,7 +56,14 @@ export default class DatabaseConnection {
             mask: String,
             masks: Array,
             layout: String,
-            transactions: [trasactionSchema]
+            transactions: [trasactionSchema],
+            riotAccount: {
+                isLinked: Boolean,
+                puuid: String,
+                isPrivate: Boolean,
+                region: String,
+                access_token: String,
+            }
         }, { versionKey: false, id: false });
 
         const commandsSchema = new mongoose.Schema({
@@ -126,6 +133,13 @@ export default class DatabaseConnection {
                 masks: [],
                 layout: "default",
                 transactions: [],
+                riotAccount: {
+                    isLinked: false,
+                    puuid: null,
+                    isPrivate: false,
+                    region: null,
+                    access_token: null,
+                }
             }).save();
         }
 
@@ -246,8 +260,8 @@ export default class DatabaseConnection {
         }
     }
 
-    async getKey(userId: string) {
-        const document = await this.key.findOne({ user: userId });
+    async getKey(key: string) {
+        const document = await this.key.findOne({ key: key });
 
         if (document) {
             return document;
