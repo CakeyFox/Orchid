@@ -4,11 +4,13 @@ import DatabaseConnection from './structures/DatabaseConnection';
 
 const app: Application = express();
 const database = new DatabaseConnection(bot);
+app.use(express.json());
 
 require('dotenv').config();
 app.use('/', require('./routes/RequestHandler'));
 app.use('/', require('./routes/PaymentsHandler'));
 app.use('/', require('./routes/DBLHandler'));
+app.use('/', require('./routes/DatabaseHandler'));
 app.use('/memes', express.static('assets/commands/memes'));
 app.use('/images', express.static('assets/commands/images'));
 export { database };

@@ -21,9 +21,9 @@ export default class DatabaseConnection {
         const keySchema = new mongoose.Schema({
             key: String,
             used: Boolean,
-            user: String,
             expiresAt: Date,
             pType: Number,
+            guild: String,
         }, { versionKey: false, id: false });
         const trasactionSchema = new mongoose.Schema({
             to: String,
@@ -32,7 +32,7 @@ export default class DatabaseConnection {
             date: Date,
             received: Boolean,
             type: String,
-        }, { versionKey: false, id: false } );
+        }, { versionKey: false, id: false });
         const userSchema = new mongoose.Schema({
             _id: String,
             userCreationTimestamp: Date,
@@ -63,7 +63,8 @@ export default class DatabaseConnection {
                 isPrivate: Boolean,
                 region: String,
                 access_token: String,
-            }
+            },
+            premiumKeys: [keySchema]
         }, { versionKey: false, id: false });
 
         const commandsSchema = new mongoose.Schema({
@@ -133,13 +134,14 @@ export default class DatabaseConnection {
                 masks: [],
                 layout: "default",
                 transactions: [],
+                premiumKeys: [],
                 riotAccount: {
                     isLinked: false,
                     puuid: null,
                     isPrivate: false,
                     region: null,
                     access_token: null,
-                }
+                },
             }).save();
         }
 
@@ -236,9 +238,53 @@ export default class DatabaseConnection {
         return document;
     }
 
+    async updateUser(userId: any, data: any) {
+        try {
+            const jsonString = JSON.stringify(data);
+            const parsedData = JSON.parse(jsonString);
+            for (const key in parsedData) {
+                if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
+                    const value = parsedData[key];
+
+                    if (Array.isArray(value)) {
+                        const document = await this.user.findOneAndUpdate({ _id: userId }, { $push: { [key]: value } }, { new: true });
+                        return document;
+                    } else {
+                        const document = await this.user.findOneAndUpdate({ _id: userId }, { $set: { [key]: value } }, { new: true });
+                        return document;
+                    }
+                }
+            }
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async updateGuild(guildId: any, data: any) {
+        try {
+            const jsonString = JSON.stringify(data);
+            const parsedData = JSON.parse(jsonString);
+            for (const key in parsedData) {
+                if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
+                    const value = parsedData[key];
+
+                    if (Array.isArray(value)) {
+                        const document = await this.guilds.findOneAndUpdate({ _id: guildId }, { $push: { [key]: value } }, { new: true });
+                        return document;
+                    } else {
+                        const document = await this.guilds.findOneAndUpdate({ _id: guildId }, { $set: { [key]: value } }, { new: true });
+                        return document;
+                    }
+                }
+            }
+        } catch (error) {
+            return null;
+        }
+    }
+
     async registerKey(user: String, expiresAt: Date, pType: Number) {
         const key = uuidv4();
-        
+
         const document = await this.key.findOne({ key: key });
 
         if (document) {
@@ -261,7 +307,7 @@ export default class DatabaseConnection {
     }
 
     async getKey(key: string) {
-        const document = await this.key.findOne({ key: key });
+        const document = await this.user.findOne({ premiumKeys: { $elemMatch: { key: key } } });
 
         if (document) {
             return document;
@@ -273,5 +319,43 @@ export default class DatabaseConnection {
     async getAllUsers(): Promise<void> {
         let usersData = await this.user.find({});
         return usersData.map(user => user.toJSON());
+    }
+
+    async getAllGuilds(): Promise<void> {
+        let guildsData = await this.guilds.find({});
+        return guildsData.map(guild => guild.toJSON());
+    }
+
+    async createKey(userId, pType: string): Promise<void> {
+        const key = uuidv4();
+        const userDocument = await this.getUser(userId);
+
+        userDocument.premiumKeys.push({
+            key: key,
+            used: false,
+            expiresAt: new Date(Date.now() + 2592000000),
+            pType: pType,
+            guild: null,
+        });
+        await userDocument.save();
+        return key;
+    }
+
+    async deleteUser(userId: any) {
+        try {
+            await this.user.findOneAndDelete({ _id: userId });
+        } catch (error) {
+            console.log(error)
+            return null;
+        }
+    }
+
+    async deleteGuild(guildId: any) {
+        try {
+            await this.guilds.findOneAndDelete({ _id: guildId });
+        } catch (error) {
+            console.log(error)
+            return null;
+        }
     }
 }
