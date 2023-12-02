@@ -3,6 +3,7 @@ import fs from 'fs';
 import { database } from '..';
 import { lylist, masks, bglist } from '../structures/json/profileAssets.json';
 import fetch from 'node-fetch-commonjs';
+import crypto from 'crypto';
 
 const request = require('request');
 
@@ -11,43 +12,20 @@ router.get("/", (req, res) => {
     res.sendFile("index.html", { root: "./pages/" })
 });
 
-router.get("/user/get/:id", async (req, res) => {
-    const { id } = req.params;
-    const token = req.header("Authorization");
-
-    if (token === process.env.AUTHORIZATION) {
-        const user = await database.getUser(id);
-        res.send(user);
-    } else {
-        res.status(401).send({ error: "Invalid key" });
-    }
-});
-
-
 router.get("/images/:commandName", (req, res) => {
     const { commandName } = req.params;
-    const key = req.header("Authorization");
-    if (key === process.env.AUTHORIZATION) {
-        try {
-            const commandFiles = fs.readdirSync(`./assets/commands/images/${commandName}`);
-            const asset = commandFiles[(Math.floor(Math.random() * commandFiles.length))]
-            res.send({ url: `${process.env.API_URL}/images/${commandName}/${asset}` });
-        } catch (e) {
-            res.status(404);
-            console.error(e)
-        }
-    } else {
-        res.status(401).send({ error: "Invalid key" });
-    }
-});
+    const token = req.header("Authorization");
+    const timingSafeEqual = (a, b) => {
+        const bufferA = Buffer.from(a);
+        const bufferB = Buffer.from(b);
 
+        return crypto.timingSafeEqual(bufferA, bufferB);
+    };
 
-router.get("/guild/get/:id", async (req, res) => {
-    const { id } = req.params;
-    const key = req.header("Authorization");
-    if (key === process.env.AUTHORIZATION) {
-        const guild = await database.getGuild(id);
-        res.send(guild);
+    if (timingSafeEqual(token, process.env.AUTHORIZATION)) {
+        const commandFiles = fs.readdirSync(`./assets/commands/images/${commandName}`);
+        const asset = commandFiles[(Math.floor(Math.random() * commandFiles.length))]
+        res.send({ url: `${process.env.API_URL}/images/${commandName}/${asset}` });
     } else {
         res.status(401).send({ error: "Invalid key" });
     }
@@ -94,7 +72,7 @@ router.get("/profileAssets", (req, res) => {
     res.send({ masks, bglist, lylist });
 });
 
-router.get("/key/:id", async (req, res) => {
+router.get("/keys/:id", async (req, res) => {
     const { id } = req.params;
     const key = req.header("Authorization");
     if (key === process.env.AUTHORIZATION) {
@@ -102,7 +80,7 @@ router.get("/key/:id", async (req, res) => {
         if (keyInfo) {
             return res.send({ status: 200, keyInfo });
         } else {
-            return res.status(404).send({ status: 404, error: "This key doesn't exist" })
+            return res.status(404).send({ status: 404, error: "Can't find any user with this key" })
         }
     } else {
         return res.status(401).send({ error: "Invalid key" });
