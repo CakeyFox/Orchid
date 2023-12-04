@@ -242,19 +242,19 @@ export default class DatabaseConnection {
         try {
             const jsonString = JSON.stringify(data);
             const parsedData = JSON.parse(jsonString);
+            let updateObject = {};
             for (const key in parsedData) {
                 if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
                     const value = parsedData[key];
-
                     if (Array.isArray(value)) {
-                        const document = await this.user.findOneAndUpdate({ _id: userId }, { $push: { [key]: value } }, { new: true });
-                        return document;
+                        updateObject = { ...updateObject, $push: { [key]: value } };
                     } else {
-                        const document = await this.user.findOneAndUpdate({ _id: userId }, { $set: { [key]: value } }, { new: true });
-                        return document;
+                        updateObject = { ...updateObject, $set: { [key]: value } };
                     }
                 }
             }
+            const document = await this.user.findOneAndUpdate({ _id: userId }, updateObject, { new: true });
+            return document;
         } catch (error) {
             return null;
         }
@@ -264,19 +264,19 @@ export default class DatabaseConnection {
         try {
             const jsonString = JSON.stringify(data);
             const parsedData = JSON.parse(jsonString);
+            let updateObject = {};
             for (const key in parsedData) {
                 if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
                     const value = parsedData[key];
-
                     if (Array.isArray(value)) {
-                        const document = await this.guilds.findOneAndUpdate({ _id: guildId }, { $push: { [key]: value } }, { new: true });
-                        return document;
+                        updateObject = { ...updateObject, $push: { [key]: value } };
                     } else {
-                        const document = await this.guilds.findOneAndUpdate({ _id: guildId }, { $set: { [key]: value } }, { new: true });
-                        return document;
+                        updateObject = { ...updateObject, $set: { [key]: value } };
                     }
                 }
             }
+            const document = await this.guilds.findOneAndUpdate({ _id: guildId }, updateObject, { new: true });
+            return document;
         } catch (error) {
             return null;
         }
