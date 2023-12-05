@@ -8,7 +8,7 @@ const stripe = require('stripe')(process.env.STRIPE_KEY);
 const router = require('express').Router();
 
 router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
-    const event = JSON.parse(req.body.toString());
+    const event = req.body;
     const sig = req.headers['stripe-signature'];
     res.status(200).send();
 
@@ -193,7 +193,7 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
             }
         }
 
-        case 'invoice.payment_suceeded': {
+        case 'invoice.payment_succeeded': {
             const invoice = event.data.object;
             if (invoice.billing_reason === "subscription_cycle") {
                 const customer = await stripe.customers.retrieve(invoice.customer, {
@@ -208,6 +208,7 @@ router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req
                 await user.save();
                 await guildKey.save();
             }
+            break;
         }
     }
 });
