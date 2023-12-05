@@ -8,6 +8,7 @@ export default class DatabaseConnection {
     private commands: any;
     private guilds: any;
     private key: any;
+    private legacykeys: any;
 
     constructor(client) {
         mongoose.set("strictQuery", true)
@@ -18,6 +19,15 @@ export default class DatabaseConnection {
             logger.error(`Failed to connect to database: `, error);
         });
         logger.info(`[DATABASE] Connected to database!`);
+        const legacyKeySchema = new mongoose.Schema({
+            key: String,
+            user: String,
+            used: Boolean,
+            expiresAt: Date,
+            pType: Number,
+            guild: String,
+        }, { versionKey: false, id: false
+        });
         const keySchema = new mongoose.Schema({
             key: String,
             used: Boolean,
@@ -70,6 +80,10 @@ export default class DatabaseConnection {
         const commandsSchema = new mongoose.Schema({
             commandName: String,
             commandUsageCount: Number,
+            description: String,
+            isInactive: Boolean,
+            subcommands: Array,
+            usage: Array
         }, { versionKey: false, id: false });
 
         const guildSchema = new mongoose.Schema({
@@ -99,6 +113,7 @@ export default class DatabaseConnection {
         this.commands = mongoose.model('commands', commandsSchema);
         this.guilds = mongoose.model('guilds', guildSchema);
         this.key = mongoose.model('key', keySchema);
+        this.legacykeys = mongoose.model('legacykeys', legacyKeySchema);
         this.client = client;
     }
 
@@ -284,35 +299,24 @@ export default class DatabaseConnection {
 
     async registerKey(user: String, expiresAt: Date, pType: Number) {
         const key = uuidv4();
+        const userDocument = await this.getUser(user);
 
-        const document = await this.key.findOne({ key: key });
-
-        if (document) {
-            if (document.user === user) {
-                document.expiresAt = expiresAt;
-                document.pType = pType;
-                await document.save();
-                return document;
-            }
-        } else {
-            const newKey = await new this.key({
-                key: key,
-                used: false,
-                user: user,
-                expiresAt: expiresAt,
-                pType: pType,
-            }).save();
-            return newKey;
-        }
+        userDocument.premiumKeys.push({
+            key: key,
+            used: false,
+            expiresAt: expiresAt,
+            pType: pType,
+            guild: null,
+        });
     }
 
     async getKey(key: string) {
-        const document = await this.user.findOne({ premiumKeys: { $elemMatch: { key: key } } });
+        var document = await this.user.findOne({ premiumKeys: { $elemMatch: { key: key } } });
 
-        if (document) {
-            return document;
-        } else {
+        if (!document) {
             return null;
+        } else {
+            return document;
         }
     }
 
