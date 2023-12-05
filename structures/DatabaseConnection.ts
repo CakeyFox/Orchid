@@ -253,7 +253,7 @@ export default class DatabaseConnection {
         return document;
     }
 
-    async updateUser(userId: any, data: any) {
+    async updateUser(userId: any, data: any, removeFromArray?: boolean | false) {
         try {
             const jsonString = JSON.stringify(data);
             const parsedData = JSON.parse(jsonString);
@@ -262,7 +262,11 @@ export default class DatabaseConnection {
                 if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
                     const value = parsedData[key];
                     if (Array.isArray(value)) {
-                        updateObject = { ...updateObject, $push: { [key]: value } };
+                        if (removeFromArray) {
+                            updateObject = { ...updateObject, $pull: { [key]: value } };
+                        } else {
+                            updateObject = { ...updateObject, $push: { [key]: value } };
+                        }
                     } else {
                         updateObject = { ...updateObject, $set: { [key]: value } };
                     }
@@ -275,7 +279,7 @@ export default class DatabaseConnection {
         }
     }
 
-    async updateGuild(guildId: any, data: any) {
+    async updateGuild(guildId: any, data: any, removeFromArray?: boolean | false) {
         try {
             const jsonString = JSON.stringify(data);
             const parsedData = JSON.parse(jsonString);
@@ -284,7 +288,11 @@ export default class DatabaseConnection {
                 if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
                     const value = parsedData[key];
                     if (Array.isArray(value)) {
-                        updateObject = { ...updateObject, $push: { [key]: value } };
+                        if (removeFromArray) {
+                            updateObject = { ...updateObject, $pull: { [key]: value } };
+                        } else {
+                            updateObject = { ...updateObject, $push: { [key]: value } };
+                        }
                     } else {
                         updateObject = { ...updateObject, $set: { [key]: value } };
                     }
