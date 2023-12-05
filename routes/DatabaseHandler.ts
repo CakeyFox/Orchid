@@ -169,4 +169,22 @@ router.post('/guild/delete/:id', async (req, res) => {
         res.status(401).send({ error: "Invalid key" });
     }
 });
+
+router.get('/guild/delete/:id', async (req, res) => {
+    const { id } = req.params;
+    const token = req.header("Authorization");
+    const timingSafeEqual = (a, b) => {
+        const bufferA = Buffer.from(a);
+        const bufferB = Buffer.from(b);
+        return crypto.timingSafeEqual(bufferA, bufferB);
+    };
+
+    if (timingSafeEqual(token, process.env.AUTHORIZATION)) {
+        await database.deleteGuild(id);
+        res.send({ success: true });
+    } else {
+        res.status(401).send({ error: "Invalid key" });
+    }
+});
+
 export = router;
