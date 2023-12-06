@@ -10,6 +10,8 @@ const router = require('express').Router();
 router.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
     const event = req.body;
     const sig = req.headers['stripe-signature'];
+    if (!sig) return res.status(400).send('No signature found!');
+    if (!event) return res.status(400).send('No event found!');
     res.status(200).send();
 
     switch (event.type) {
