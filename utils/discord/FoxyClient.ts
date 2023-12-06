@@ -1,4 +1,4 @@
-import { createBot, Intents, startBot, Bot } from 'discordeno';
+import { createBot, Intents, startBot, Bot, ActivityTypes } from 'discordeno';
 import { FoxyRestManager } from '../../structures/RestManager';
 
 require('dotenv').config();

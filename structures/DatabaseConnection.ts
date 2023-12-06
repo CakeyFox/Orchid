@@ -35,6 +35,15 @@ export default class DatabaseConnection {
             pType: Number,
             guild: String,
         }, { versionKey: false, id: false });
+        const keySchemaForGuilds = new mongoose.Schema({
+            key: String,
+            used: Boolean,
+            expiresAt: Date,
+            pType: Number,
+            guild: String,
+            owner: String,
+        }, { versionKey: false, id: false
+        });
         const trasactionSchema = new mongoose.Schema({
             to: String,
             from: String,
@@ -107,7 +116,8 @@ export default class DatabaseConnection {
                 leaveMessage: String,
                 joinChannel: String,
                 leaveChannel: String,
-            }
+            },
+            premiumKeys: [keySchemaForGuilds]
         }, { versionKey: false, id: false });
         this.user = mongoose.model('user', userSchema);
         this.commands = mongoose.model('commands', commandsSchema);
