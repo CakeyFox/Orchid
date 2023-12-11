@@ -148,7 +148,4 @@ router.get("/rso/auth/callback", async (req, res) => {
     });
 });
 
-router.get("/rso/logout", async (req, res) => {
-    // todo
-});
 export = router;
