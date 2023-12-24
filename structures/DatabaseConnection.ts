@@ -9,6 +9,7 @@ export default class DatabaseConnection {
     private guilds: any;
     private key: any;
     private legacykeys: any;
+    private riotAccount: any;
 
     constructor(client) {
         mongoose.set("strictQuery", true)
@@ -119,11 +120,18 @@ export default class DatabaseConnection {
             },
             premiumKeys: [keySchemaForGuilds]
         }, { versionKey: false, id: false });
+
+        const riotAccountSchema = new mongoose.Schema({
+            puuid: String,
+            authCode: String,
+        });
+        
         this.user = mongoose.model('user', userSchema);
         this.commands = mongoose.model('commands', commandsSchema);
         this.guilds = mongoose.model('guilds', guildSchema);
         this.key = mongoose.model('key', keySchema);
         this.legacykeys = mongoose.model('legacykeys', legacyKeySchema);
+        this.riotAccount = mongoose.model('riotAccount', riotAccountSchema);
         this.client = client;
     }
 
@@ -315,6 +323,21 @@ export default class DatabaseConnection {
         }
     }
 
+    async addAccount(puuid: string, authCode: string) {
+        let document = await this.riotAccount.findOne({ puuid: puuid });
+
+        if (document) {
+            document.authCode = authCode;
+            document.save();
+        } else {
+            document = new this.riotAccount({
+                puuid: puuid,
+                authCode: authCode,
+            }).save();
+        }
+        return document;
+    }
+    
     async registerKey(user: String, expiresAt: Date, pType: Number) {
         const key = uuidv4();
         const userDocument = await this.getUser(user);

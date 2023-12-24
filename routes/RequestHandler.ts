@@ -3,7 +3,7 @@ import fs from 'fs';
 import { database } from '..';
 import { lylist, masks, bglist } from '../structures/json/profileAssets.json';
 import fetch from 'node-fetch-commonjs';
-import crypto from 'crypto';
+import crypto, { randomUUID } from 'crypto';
 
 const request = require('request');
 
@@ -119,8 +119,8 @@ router.get("/rso/auth/callback", async (req, res) => {
                 }
 
                 const jsonData: any = await response.json();
+                const key = randomUUID();
 
-                const userData = await database.getUser(req.query.state);
                 async function getUUID(): Promise<any> {
                     return fetch(`https://api.henrikdev.xyz/valorant/v1/account/${jsonData.gameName}/${jsonData.tagLine}`, {
                         headers: {
@@ -129,16 +129,15 @@ router.get("/rso/auth/callback", async (req, res) => {
                     }).then(res => res.json());
 
                 }
-                userData.riotAccount = {
-                    isLinked: true,
-                    puuid: (await getUUID()).data.puuid,
-                    isPrivate: false,
-                    region: null,
-                    access_token: JSON.parse(body).access_token,
-                }
+                await database.addAccount((await getUUID()).data.puuid, key);
+                const queryStringParams = new URLSearchParams({
+                    "puuid": (await getUUID()).data.puuid,
+                    "gameName": jsonData.gameName,
+                    "tagLine": jsonData.tagLine,
+                    "key": key
+                });
 
-                await userData.save();
-                res.status(200).redirect('https://foxybot.win/riot/connection/status=200')
+                res.redirect(`https://foxybot.win/br/rso/login?=${queryStringParams}`)
             })
             .catch((error) => {
                 console.error('Error:', error);
