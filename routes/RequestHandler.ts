@@ -14,21 +14,9 @@ router.get("/", (req, res) => {
 
 router.get("/images/:commandName", (req, res) => {
     const { commandName } = req.params;
-    const token = req.header("Authorization");
-    const timingSafeEqual = (a, b) => {
-        const bufferA = Buffer.from(a);
-        const bufferB = Buffer.from(b);
-
-        return crypto.timingSafeEqual(bufferA, bufferB);
-    };
-
-    if (timingSafeEqual(token, process.env.AUTHORIZATION)) {
-        const commandFiles = fs.readdirSync(`./assets/commands/images/${commandName}`);
-        const asset = commandFiles[(Math.floor(Math.random() * commandFiles.length))]
-        res.send({ url: `${process.env.API_URL}/images/${commandName}/${asset}` });
-    } else {
-        res.status(401).send({ error: "Invalid key" });
-    }
+    const commandFiles = fs.readdirSync(`./assets/commands/images/${commandName}`);
+    const asset = commandFiles[(Math.floor(Math.random() * commandFiles.length))]
+    res.send({ url: `${process.env.API_URL}/images/${commandName}/${asset}` });
 });
 
 router.get("/backgrounds/:id", (req, res): void => {
