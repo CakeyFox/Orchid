@@ -12,6 +12,7 @@ app.use('/', require('./routes/PaymentsHandler'));
 app.use('/', require('./routes/DBLHandler'));
 app.use('/memes', express.static('assets/commands/memes'));
 app.use('/images', express.static('assets/commands/images'));
+app.use('/valorant', express.static('assets/valorant'));
 export { database };
 
 app.listen(8080, () => {
