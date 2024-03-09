@@ -269,58 +269,6 @@ export default class DatabaseConnection {
         return document;
     }
 
-    async updateUser(userId: any, data: any, removeFromArray?: boolean | false) {
-        try {
-            const jsonString = JSON.stringify(data);
-            const parsedData = JSON.parse(jsonString);
-            let updateObject = {};
-            for (const key in parsedData) {
-                if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
-                    const value = parsedData[key];
-                    if (Array.isArray(value)) {
-                        if (removeFromArray) {
-                            updateObject = { ...updateObject, $pull: { [key]: value } };
-                        } else {
-                            updateObject = { ...updateObject, $push: { [key]: value } };
-                        }
-                    } else {
-                        updateObject = { ...updateObject, $set: { [key]: value } };
-                    }
-                }
-            }
-            const document = await this.user.findOneAndUpdate({ _id: userId }, updateObject, { new: true });
-            return document;
-        } catch (error) {
-            return null;
-        }
-    }
-
-    async updateGuild(guildId: any, data: any, removeFromArray?: boolean | false) {
-        try {
-            const jsonString = JSON.stringify(data);
-            const parsedData = JSON.parse(jsonString);
-            let updateObject = {};
-            for (const key in parsedData) {
-                if (Object.prototype.hasOwnProperty.call(parsedData, key)) {
-                    const value = parsedData[key];
-                    if (Array.isArray(value)) {
-                        if (removeFromArray) {
-                            updateObject = { ...updateObject, $pull: { [key]: value } };
-                        } else {
-                            updateObject = { ...updateObject, $push: { [key]: value } };
-                        }
-                    } else {
-                        updateObject = { ...updateObject, $set: { [key]: value } };
-                    }
-                }
-            }
-            const document = await this.guilds.findOneAndUpdate({ _id: guildId }, updateObject, { new: true });
-            return document;
-        } catch (error) {
-            return null;
-        }
-    }
-
     async addAccount(puuid: string, authCode: string) {
         let document = await this.riotAccount.findOne({ puuid: puuid });
 

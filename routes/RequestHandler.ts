@@ -76,7 +76,7 @@ router.get("/keys/:id", async (req, res) => {
 });
 
 router.get("/rso/auth/callback", async (req, res) => {
-    const code = req.query.code;
+    const code = await req.query.code;
     request.post({
         url: "https://auth.riotgames.com/token",
         auth: {
