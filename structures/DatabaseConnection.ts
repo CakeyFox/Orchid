@@ -1,34 +1,21 @@
-import mongoose, { ConnectOptions } from 'mongoose';
-import { logger } from '../utils/logger';
+import mongoose from 'mongoose';
+import { User } from 'discordeno/transformers';
 import { bot } from '../utils/discord/FoxyClient';
 const { v4: uuidv4 } = require('uuid');
+
 export default class DatabaseConnection {
     private client: any;
     private user: any;
     private commands: any;
     private guilds: any;
     private key: any;
-    private legacykeys: any;
     private riotAccount: any;
 
     constructor(client) {
         mongoose.set("strictQuery", true)
-        mongoose.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        } as ConnectOptions).catch((error) => {
-            logger.error(`Failed to connect to database: `, error);
+        mongoose.connect(process.env.MONGODB_URI).catch((error) => {
         });
-        logger.info(`[DATABASE] Connected to database!`);
-        const legacyKeySchema = new mongoose.Schema({
-            key: String,
-            user: String,
-            used: Boolean,
-            expiresAt: Date,
-            pType: Number,
-            guild: String,
-        }, { versionKey: false, id: false
-        });
+
         const keySchema = new mongoose.Schema({
             key: String,
             used: Boolean,
@@ -43,7 +30,8 @@ export default class DatabaseConnection {
             pType: Number,
             guild: String,
             owner: String,
-        }, { versionKey: false, id: false
+        }, {
+            versionKey: false, id: false
         });
         const trasactionSchema = new mongoose.Schema({
             to: String,
@@ -81,7 +69,7 @@ export default class DatabaseConnection {
                 isLinked: Boolean,
                 puuid: String,
                 isPrivate: Boolean,
-                region: String,
+                region: String
             },
             premiumKeys: [keySchema]
         }, { versionKey: false, id: false });
@@ -117,29 +105,38 @@ export default class DatabaseConnection {
                 joinChannel: String,
                 leaveChannel: String,
             },
+            valAutoRoleModule: {
+                isEnabled: Boolean,
+                unratedRole: String,
+                ironRole: String,
+                bronzeRole: String,
+                silverRole: String,
+                goldRole: String,
+                platinumRole: String,
+                diamondRole: String,
+                ascendantRole: String,
+                immortalRole: String,
+                radiantRole: String,
+            },
             premiumKeys: [keySchemaForGuilds]
         }, { versionKey: false, id: false });
-
         const riotAccountSchema = new mongoose.Schema({
             puuid: String,
             authCode: String,
         });
-        
+
         this.user = mongoose.model('user', userSchema);
         this.commands = mongoose.model('commands', commandsSchema);
         this.guilds = mongoose.model('guilds', guildSchema);
         this.key = mongoose.model('key', keySchema);
-        this.legacykeys = mongoose.model('legacykeys', legacyKeySchema);
         this.riotAccount = mongoose.model('riotAccount', riotAccountSchema);
         this.client = client;
     }
 
     async getUser(userId: any): Promise<any> {
-        const user = await bot.helpers.getUser(userId)
-
-        if (!user) return null;
-
-        let document = await this.user.findOne({ _id: userId });
+        if (!userId) null;
+        const user: User = await bot.helpers.getUser(String(userId));
+        let document = await this.user.findOne({ _id: user.id });
 
         if (!document) {
             document = new this.user({
@@ -166,30 +163,17 @@ export default class DatabaseConnection {
                 masks: [],
                 layout: "default",
                 transactions: [],
-                premiumKeys: [],
                 riotAccount: {
                     isLinked: false,
                     puuid: null,
                     isPrivate: false,
-                    region: null,
+                    region: null
                 },
+                premiumKeys: []
             }).save();
         }
 
         return document;
-    }
-
-    async getAllCommands(): Promise<void> {
-        let commandsData = await this.commands.find({});
-        return commandsData.map(command => command.toJSON());
-    }
-
-    async getAllUsageCount(): Promise<Number> {
-        let commandsData = await this.commands.find({});
-        let usageCount = 0;
-        commandsData.map(command => usageCount += command.commandUsageCount);
-        return usageCount;
-
     }
 
     async getGuild(guildId: BigInt) {
@@ -217,73 +201,34 @@ export default class DatabaseConnection {
                     leaveMessage: null,
                     joinChannel: null,
                     leaveChannel: null,
-                }
-            }).save();
-        }
-
-        return document;
-    }
-
-    async addGuild(guildId: BigInt) {
-        let document = await this.guilds.findOne({ _id: guildId });
-
-        if (!document) {
-            document = new this.guilds({
-                _id: guildId,
-                InviteBlockerModule: {
-                    isEnabled: false,
-                    whitelistedInvites: [],
-                    whitelistedChannels: [],
-                    whitelistedRoles: [],
-                    whitelistedUsers: [],
-                    blockMessage: null,
                 },
-                AutoRoleModule: {
+                valAutoRoleModule: {
                     isEnabled: false,
-                    roles: [],
+                    unratedRole: null,
+                    ironRole: null,
+                    bronzeRole: null,
+                    silverRole: null,
+                    goldRole: null,
+                    platinumRole: null,
+                    diamondRole: null,
+                    ascendantRole: null,
+                    immortalRole: null,
+                    radiantRole: null,
                 },
-                GuildJoinLeaveModule: {
-                    isEnabled: false,
-                    joinMessage: null,
-                    alertWhenUserLeaves: false,
-                    leaveMessage: null,
-                    joinChannel: null,
-                    leaveChannel: null,
-                }
-            }).save();
-            return null;
-        }
+                premiumKeys: []
 
-        return document;
-    }
-
-    async removeGuild(guildId: BigInt) {
-        let document = await this.guilds.findOne({ _id: guildId });
-
-        if (document) {
-            document.delete();
-        } else {
-            return null;
-        }
-
-        return document;
-    }
-
-    async addAccount(puuid: string, authCode: string) {
-        let document = await this.riotAccount.findOne({ puuid: puuid });
-
-        if (document) {
-            document.authCode = authCode;
-            document.save();
-        } else {
-            document = new this.riotAccount({
-                puuid: puuid,
-                authCode: authCode,
             }).save();
         }
+
         return document;
     }
-    
+
+    async getAllUsers(): Promise<void> {
+        let usersData = await this.user.find({});
+        return usersData.map(user => user.toJSON());
+    }
+
+
     async registerKey(user: String, expiresAt: Date, pType: Number) {
         const key = uuidv4();
         const userDocument = await this.getUser(user);
@@ -306,12 +251,6 @@ export default class DatabaseConnection {
             return document;
         }
     }
-
-    async getAllUsers(): Promise<void> {
-        let usersData = await this.user.find({});
-        return usersData.map(user => user.toJSON());
-    }
-
     async getAllGuilds(): Promise<void> {
         let guildsData = await this.guilds.find({});
         return guildsData.map(guild => guild.toJSON());
@@ -349,4 +288,20 @@ export default class DatabaseConnection {
             return null;
         }
     }
+
+    async addAccount(puuid: string, authCode: string) {
+        let document = await this.riotAccount.findOne({ puuid: puuid });
+
+        if (document) {
+            document.authCode = authCode;
+            document.save();
+        } else {
+            document = new this.riotAccount({
+                puuid: puuid,
+                authCode: authCode,
+            }).save();
+        }
+        return document;
+    }
+
 }
