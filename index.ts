@@ -1,28 +1,33 @@
 import express, { Application } from 'express';
-import { bot } from './utils/discord/FoxyClient';
-import DatabaseConnection from './structures/DatabaseConnection';
+import { bot } from './services/foxy/Client';
+import DatabaseConnection from './services/foxy/Database';
+import { logger } from './utils/logger';
 
 const app: Application = express();
 const database = new DatabaseConnection(bot);
 app.use(express.json());
 
 require('dotenv').config();
-app.use('/', require('./routes/RequestHandler'));
-app.use('/', require('./routes/PaymentsHandler'));
-app.use('/', require('./routes/DBLHandler'));
-app.use('/memes', express.static('assets/commands/memes'));
-app.use('/images', express.static('assets/commands/images'));
-app.use('/valorant', express.static('assets/valorant'));
-export { database };
 
-app.listen(8080, () => {
-    console.info('[FOXY API] Server is running on port 8080')
+/* Route Handlers */
+app.use('/', require('./routes/RequestHandler'));
+// app.use('/', require('./routes/PaymentsHandler'));
+app.use('/', require('./routes/foxy/DBLHandler'));
+app.use('/', require('./routes/RSOHandler'));
+
+/* Static File Handler */
+app.use('/assets', express.static('assets/'));
+
+app.listen(process.env.PORT, () => {
+    logger.info(`[READY] - Server is running at https://localhost:${process.env.PORT}`);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-    console.error('[UNHANDLED REJECTION] Reason: ', reason);
+    logger.error('[UNHANDLED REJECTION] Reason: ', reason);
 });
 
 process.on('uncaughtException', (error) => {
-    console.error('[UNCAUGHT EXCEPTION] Error: ', error);
+    logger.criticalError('[UNCAUGHT EXCEPTION] Error: ', error);
 });
+
+export { database };
