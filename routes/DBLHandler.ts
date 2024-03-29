@@ -1,5 +1,5 @@
 import { database } from '..';
-import { rest } from '../utils/discord/FoxyClient';
+import { rest } from '../services/foxy/Client';
 const dbl = require('@top-gg/sdk');
 const router = require('express').Router();
 
