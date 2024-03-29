@@ -334,16 +334,6 @@
             "id": "topper",
             "filename": "topper.png",
             "price": 50000
-        },
-        {
-            "name": "Yoru's Ultimate",
-            "nameLocalizations": {
-                "pt-BR": "Ultimate do Yoru"
-            },
-            "id": "yoru-mask",
-            "filename": "yoru-mask.png",
-            "price": 60500,
-            "type": "face-mask"
         }
     ]
 }
