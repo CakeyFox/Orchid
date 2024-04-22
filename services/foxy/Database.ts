@@ -14,6 +14,7 @@ export default class DatabaseConnection {
     constructor(client) {
         mongoose.set("strictQuery", true)
         mongoose.connect(process.env.MONGODB_URI).catch((error) => {
+            console.error(error);
         });
 
         const keySchema = new mongoose.Schema({
@@ -129,7 +130,7 @@ export default class DatabaseConnection {
         this.commands = mongoose.model('commands', commandsSchema);
         this.guilds = mongoose.model('guilds', guildSchema);
         this.key = mongoose.model('key', keySchema);
-        this.riotAccount = mongoose.model('riotAccount', riotAccountSchema);
+        this.riotAccount = mongoose.model('riotaccounts', riotAccountSchema);
         this.client = client;
     }
 

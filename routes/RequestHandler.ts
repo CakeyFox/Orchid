@@ -1,6 +1,6 @@
 import express from 'express';
 import fs from 'fs';
-import { database } from '..';
+import { database } from '../index';
 import { lylist, masks, bglist } from '../json/profileAssets.json';
 
 const router = express.Router();

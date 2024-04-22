@@ -1,7 +1,7 @@
 import fetch from 'node-fetch-commonjs';
 import crypto, { randomUUID } from 'crypto';
 import express from 'express';
-import { database } from '..';
+import { database } from '../index';
 
 const request = require('request');
 const router = express.Router();
