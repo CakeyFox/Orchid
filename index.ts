@@ -11,11 +11,10 @@ require('dotenv').config();
 
 /* Route Handlers */
 app.use('/', require('./routes/RequestHandler'));
-// app.use('/', require('./routes/PaymentsHandler'));
-app.use('/', require('./routes/foxy/DBLHandler'));
 app.use('/', require('./routes/RSOHandler'));
+app.use('/', require('./routes/DBLHandler'));
 
-/* Static File Handler */
+/* Static Files */
 app.use('/assets', express.static('assets/'));
 
 app.listen(process.env.PORT, () => {
