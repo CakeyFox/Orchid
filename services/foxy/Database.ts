@@ -1,21 +1,24 @@
 import mongoose from 'mongoose';
-import { User } from 'discordeno/transformers';
+import { logger } from '../../utils/logger';
 import { bot } from './Client';
+import { User } from 'discordeno/transformers';
+import { Bot } from 'discordeno/*';
 const { v4: uuidv4 } = require('uuid');
 
 export default class DatabaseConnection {
-    private client: any;
-    private user: any;
-    private commands: any;
-    private guilds: any;
-    private key: any;
-    private riotAccount: any;
+    public client: Bot;
+    public key: any;
+    public user: any;
+    public commands: any;
+    public guilds: any;
+    public riotAccount: any;
 
     constructor(client) {
         mongoose.set("strictQuery", true)
         mongoose.connect(process.env.MONGODB_URI).catch((error) => {
-            console.error(error);
+            logger.error(`Failed to connect to database: `, error);
         });
+        logger.info(`[DATABASE] Connected to database!`);
 
         const keySchema = new mongoose.Schema({
             key: String,
@@ -23,6 +26,30 @@ export default class DatabaseConnection {
             expiresAt: Date,
             pType: Number,
             guild: String,
+        }, { versionKey: false, id: false });
+        const transactionSchema = new mongoose.Schema({
+            to: String,
+            from: String,
+            quantity: Number,
+            date: Date,
+            received: Boolean,
+            type: String
+        }, {
+            versionKey: false, id: false
+        });
+        const petSchema = new mongoose.Schema({
+            name: String,
+            type: String,
+            rarity: String,
+            level: Number,
+            hungry: Number,
+            happy: Number,
+            health: Number,
+            lastHungry: Date,
+            lastHappy: Date,
+            isDead: Boolean,
+            isClean: Boolean,
+            food: Array
         }, { versionKey: false, id: false });
         const keySchemaForGuilds = new mongoose.Schema({
             key: String,
@@ -34,38 +61,41 @@ export default class DatabaseConnection {
         }, {
             versionKey: false, id: false
         });
-        const trasactionSchema = new mongoose.Schema({
-            to: String,
-            from: String,
-            quantity: Number,
-            date: Date,
-            received: Boolean,
-            type: String,
-        }, { versionKey: false, id: false });
         const userSchema = new mongoose.Schema({
             _id: String,
             userCreationTimestamp: Date,
-            premium: Boolean,
-            premiumDate: Date,
             isBanned: Boolean,
-            banData: Date,
+            banDate: Date,
             banReason: String,
-            aboutme: String,
-            balance: Number,
-            lastDaily: Date,
-            marriedWith: String,
-            marriedDate: Date,
-            cantMarry: Boolean,
-            repCount: Number,
-            lastRep: Date,
-            background: String,
-            backgrounds: Array,
-            premiumType: String,
-            language: String,
-            mask: String,
-            masks: Array,
-            layout: String,
-            transactions: [trasactionSchema],
+            userCakes: {
+                balance: Number,
+                lastDaily: Date,
+            },
+            marryStatus: {
+                marriedWith: String,
+                marriedDate: Date,
+                cantMarry: Boolean,
+            },
+            userProfile: {
+                decoration: String,
+                decorationList: Array,
+                background: String,
+                backgroundList: Array,
+                repCount: Number,
+                lastRep: Date,
+                layout: String,
+                aboutme: String,
+            },
+            userPremium: {
+                premium: Boolean,
+                premiumDate: Date,
+                premiumType: String,
+            },
+            userSettings: {
+                language: String
+            },
+            petInfo: petSchema,
+            userTransactions: [transactionSchema],
             riotAccount: {
                 isLinked: Boolean,
                 puuid: String,
@@ -86,18 +116,6 @@ export default class DatabaseConnection {
 
         const guildSchema = new mongoose.Schema({
             _id: String,
-            InviteBlockerModule: {
-                isEnabled: Boolean,
-                whitelistedInvites: Array,
-                whitelistedChannels: Array,
-                whitelistedRoles: Array,
-                whitelistedUsers: Array,
-                blockMessage: String,
-            },
-            AutoRoleModule: {
-                isEnabled: Boolean,
-                roles: Array,
-            },
             GuildJoinLeaveModule: {
                 isEnabled: Boolean,
                 joinMessage: String,
@@ -130,40 +148,64 @@ export default class DatabaseConnection {
         this.commands = mongoose.model('commands', commandsSchema);
         this.guilds = mongoose.model('guilds', guildSchema);
         this.key = mongoose.model('key', keySchema);
-        this.riotAccount = mongoose.model('riotaccounts', riotAccountSchema);
+        this.riotAccount = mongoose.model('riotAccount', riotAccountSchema);
         this.client = client;
     }
 
-    async getUser(userId: any): Promise<any> {
+    async getUser(userId: String): Promise<any> {
         if (!userId) null;
         const user: User = await bot.helpers.getUser(String(userId));
         let document = await this.user.findOne({ _id: user.id });
 
         if (!document) {
             document = new this.user({
-                _id: userId,
-                userCreationTimestamp: Date.now(),
-                premium: false,
-                premiumDate: null,
+                _id: user.id,
+                userCreationTimestamp: new Date(),
                 isBanned: false,
-                banData: null,
+                banDate: null,
                 banReason: null,
-                aboutme: null,
-                balance: 0,
-                lastDaily: null,
-                marriedWith: null,
-                marriedDate: null,
-                cantMarry: false,
-                repCount: 0,
-                lastRep: null,
-                background: "default",
-                backgrounds: ["default"],
-                premiumType: null,
-                language: 'pt-BR',
-                mask: null,
-                masks: [],
-                layout: "default",
-                transactions: [],
+                userCakes: {
+                    balance: 0,
+                    lastDaily: null,
+                },
+                marryStatus: {
+                    marriedWith: null,
+                    marriedDate: null,
+                    cantMarry: false,
+                },
+                userProfile: {
+                    decoration: null,
+                    decorationList: [],
+                    background: "default",
+                    backgroundList: ["default"],
+                    repCount: 0,
+                    lastRep: null,
+                    layout: "default",
+                    aboutme: null,
+                },
+                userPremium: {
+                    premium: false,
+                    premiumDate: null,
+                    premiumType: null,
+                },
+                userSettings: {
+                    language: 'pt-br'
+                },
+                petInfo: {
+                    name: null,
+                    type: null,
+                    rarity: null,
+                    level: 0,
+                    hungry: 100,
+                    happy: 100,
+                    health: 100,
+                    lastHungry: null,
+                    lastHappy: null,
+                    isDead: false,
+                    isClean: true,
+                    food: []
+                },
+                userTransactions: [],
                 riotAccount: {
                     isLinked: false,
                     puuid: null,
@@ -177,24 +219,36 @@ export default class DatabaseConnection {
         return document;
     }
 
-    async getGuild(guildId: BigInt) {
+    async getAllCommands(): Promise<void> {
+        let commandsData = await this.commands.find({});
+        return commandsData.map(command => command.toJSON());
+    }
+
+    async getCode(code: string): Promise<any> {
+        const riotAccount = this.riotAccount.findOne({ authCode: code });
+        if (!riotAccount) return null;
+        return riotAccount;
+    }
+
+    async getAllUsageCount(): Promise<Number> {
+        let commandsData = await this.commands.find({});
+        let usageCount = 0;
+        commandsData.map(command => usageCount += command.commandUsageCount);
+        return usageCount;
+
+    }
+
+    async getGuild(guildId: BigInt): Promise<any> {
+        let document = await this.guilds.findOne({ _id: guildId });
+        return document;
+    }
+
+    async addGuild(guildId: BigInt): Promise<any> {
         let document = await this.guilds.findOne({ _id: guildId });
 
         if (!document) {
             document = new this.guilds({
                 _id: guildId,
-                InviteBlockerModule: {
-                    isEnabled: false,
-                    whitelistedInvites: [],
-                    whitelistedChannels: [],
-                    whitelistedRoles: [],
-                    whitelistedUsers: [],
-                    blockMessage: null,
-                },
-                AutoRoleModule: {
-                    isEnabled: false,
-                    roles: [],
-                },
                 GuildJoinLeaveModule: {
                     isEnabled: false,
                     joinMessage: null,
@@ -218,7 +272,19 @@ export default class DatabaseConnection {
                 },
                 premiumKeys: []
 
-            }).save();
+            }).save()
+        }
+
+        return document;
+    }
+
+    async removeGuild(guildId: BigInt): Promise<any> {
+        let document = await this.guilds.findOne({ _id: guildId });
+
+        if (document) {
+            document.delete();
+        } else {
+            return null;
         }
 
         return document;
@@ -229,47 +295,9 @@ export default class DatabaseConnection {
         return usersData.map(user => user.toJSON());
     }
 
-
-    async registerKey(user: String, expiresAt: Date, pType: Number) {
-        const key = uuidv4();
-        const userDocument = await this.getUser(user);
-
-        userDocument.premiumKeys.push({
-            key: key,
-            used: false,
-            expiresAt: expiresAt,
-            pType: pType,
-            guild: null,
-        });
-    }
-
-    async getKey(key: string) {
-        var document = await this.user.findOne({ premiumKeys: { $elemMatch: { key: key } } });
-
-        if (!document) {
-            return null;
-        } else {
-            return document;
-        }
-    }
     async getAllGuilds(): Promise<void> {
         let guildsData = await this.guilds.find({});
-        return guildsData.map(guild => guild.toJSON());
-    }
-
-    async createKey(userId, pType: string): Promise<void> {
-        const key = uuidv4();
-        const userDocument = await this.getUser(userId);
-
-        userDocument.premiumKeys.push({
-            key: key,
-            used: false,
-            expiresAt: new Date(Date.now() + 2592000000),
-            pType: pType,
-            guild: null,
-        });
-        await userDocument.save();
-        return key;
+        return guildsData.length;
     }
 
     async deleteUser(userId: any) {
@@ -305,4 +333,41 @@ export default class DatabaseConnection {
         return document;
     }
 
+    async registerKey(user: String, expiresAt: Date, pType: Number) {
+        const key = uuidv4();
+        const userDocument = await this.getUser(user);
+
+        userDocument.premiumKeys.push({
+            key: key,
+            used: false,
+            expiresAt: expiresAt,
+            pType: pType,
+            guild: null,
+        });
+    }
+
+    async getKey(key: string) {
+        var document = await this.user.findOne({ premiumKeys: { $elemMatch: { key: key } } });
+
+        if (!document) {
+            return null;
+        } else {
+            return document;
+        }
+    }
+
+    async createKey(userId, pType: string): Promise<void> {
+        const key = uuidv4();
+        const userDocument = await this.getUser(userId);
+
+        userDocument.premiumKeys.push({
+            key: key,
+            used: false,
+            expiresAt: new Date(Date.now() + 2592000000),
+            pType: pType,
+            guild: null,
+        });
+        await userDocument.save();
+        return key;
+    }
 }
