@@ -2,7 +2,7 @@ import express from 'express';
 import fs from 'fs';
 import { database } from '../index';
 import { lylist, masks, bglist } from '../json/profileAssets.json';
-import { bot } from '../services/foxy/Client';
+import { RestManager } from 'discordeno/rest';
 
 const router = express.Router();
 router.get("/", (req, res) => {
@@ -52,28 +52,6 @@ router.get("/masks/:id", (req, res) => {
         console.warn("Mask not found")
     }
 });
-
-router.post("/status/update", (req, res) => {
-    const key = req.header("Authorization");
-    if (!key || key !== process.env.AUTHORIZATION) {
-        return res.status(401).json({ error: "Unauthorized" });
-    }
-
-    const { name, type, status, url } = req.body;
-    bot.helpers.editBotStatus({
-        activities: [{
-            name: name,
-            type: type,
-            url: url,
-            createdAt: Date.now()
-        }],
-        status: status
-    })
-    return res.status(200).json({ success: true });
-});
-
-module.exports = router;
-
 
 router.get("/profileAssets", (req, res) => {
     res.send({ masks, bglist, lylist });

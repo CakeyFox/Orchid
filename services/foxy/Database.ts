@@ -1,19 +1,17 @@
 import mongoose from 'mongoose';
 import { logger } from '../../utils/logger';
-import { bot } from './Client';
 import { User } from 'discordeno/transformers';
-import { Bot } from 'discordeno/*';
+import { rest } from '../..';
 const { v4: uuidv4 } = require('uuid');
 
 export default class DatabaseConnection {
-    public client: Bot;
     public key: any;
     public user: any;
     public commands: any;
     public guilds: any;
     public riotAccount: any;
 
-    constructor(client) {
+    constructor() {
         mongoose.set("strictQuery", true)
         mongoose.connect(process.env.MONGODB_URI).catch((error) => {
             logger.error(`Failed to connect to database: `, error);
@@ -149,12 +147,11 @@ export default class DatabaseConnection {
         this.guilds = mongoose.model('guilds', guildSchema);
         this.key = mongoose.model('key', keySchema);
         this.riotAccount = mongoose.model('riotAccount', riotAccountSchema);
-        this.client = client;
     }
 
     async getUser(userId: String): Promise<any> {
         if (!userId) null;
-        const user: User = await bot.helpers.getUser(String(userId));
+        const user: User = await rest.getUser(userId);
         let document = await this.user.findOne({ _id: user.id });
 
         if (!document) {

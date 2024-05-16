@@ -1,10 +1,12 @@
 import express, { Application } from 'express';
-import { bot } from './services/foxy/Client';
 import DatabaseConnection from './services/foxy/Database';
 import { logger } from './utils/logger';
+import { RestManager } from './services/foxy/RestManager';
 
 const app: Application = express();
-const database = new DatabaseConnection(bot);
+const database = new DatabaseConnection();
+const rest = new RestManager();
+
 app.use(express.json());
 
 require('dotenv').config();
@@ -29,4 +31,4 @@ process.on('uncaughtException', (error) => {
     logger.criticalError('[UNCAUGHT EXCEPTION] Error: ', error);
 });
 
-export { database };
+export { database, rest };
