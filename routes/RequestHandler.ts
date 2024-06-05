@@ -2,18 +2,22 @@ import express from 'express';
 import fs from 'fs';
 import { database } from '../index';
 import { lylist, masks, bglist } from '../json/profileAssets.json';
-import { RestManager } from 'discordeno/rest';
 
 const router = express.Router();
 router.get("/", (req, res) => {
     res.sendFile("index.html", { root: "./pages/" })
 });
 
-router.get("/images/:commandName", (req, res) => {
+router.get("/roleplay/:commandName", (req, res) => {
     const { commandName } = req.params;
-    const commandFiles = fs.readdirSync(`./assets/commands/images/${commandName}`);
+    let commandFiles;
+    try {
+        commandFiles = fs.readdirSync(`./assets/commands/roleplay/${commandName}`);
+    } catch (err) {
+        return res.status(404).send({ error: "Command not found" });
+    }
     const asset = commandFiles[(Math.floor(Math.random() * commandFiles.length))]
-    res.send({ url: `${process.env.API_URL}/images/${commandName}/${asset}` });
+    res.send({ url: `${process.env.API_URL}/assets/commands/roleplay/${commandName}/${asset}` });
 });
 
 router.get("/backgrounds/:id", (req, res): void => {

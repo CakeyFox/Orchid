@@ -43,7 +43,7 @@ router.get("/rso/auth/callback", async (req, res) => {
                 async function getUUID(): Promise<any> {
                     return fetch(`https://api.henrikdev.xyz/valorant/v1/account/${jsonData.gameName}/${jsonData.tagLine}`, {
                         headers: {
-                            "Authentication": process.env.VALORANT_API
+                            "Authorization": process.env.VALORANT_API
                         }
                     }).then(res => res.json());
 
