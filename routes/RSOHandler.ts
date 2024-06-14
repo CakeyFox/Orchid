@@ -1,5 +1,5 @@
 import fetch from 'node-fetch-commonjs';
-import crypto, { randomUUID } from 'crypto';
+import { randomUUID } from 'crypto';
 import express from 'express';
 import { database } from '../index';
 
