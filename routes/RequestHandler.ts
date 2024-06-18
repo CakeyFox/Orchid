@@ -1,8 +1,6 @@
 import express from 'express';
 import fs from 'fs';
 import { database } from '../index';
-import { lylist, masks, bglist } from '../json/profileAssets.json';
-
 const router = express.Router();
 router.get("/", (req, res) => {
     res.sendFile("index.html", { root: "./pages/" })
@@ -20,9 +18,9 @@ router.get("/roleplay/:commandName", (req, res) => {
     res.send({ url: `${process.env.API_URL}/assets/commands/roleplay/${commandName}/${asset}` });
 });
 
-router.get("/backgrounds/:id", (req, res): void => {
-    const id = req.params.id;
-    const background = bglist.find(bg => bg.id === id);
+router.get("/backgrounds/:id", async (req, res): Promise<void> => {
+    const background = await database.getBackground(req.params.id);
+
     if (background) {
         res.sendFile(background.filename, { root: "./assets/backgrounds" });
     } else {
@@ -33,9 +31,9 @@ router.get("/backgrounds/:id", (req, res): void => {
     }
 });
 
-router.get("/layouts/:id", (req, res) => {
+router.get("/layouts/:id", async (req, res) => {
     const id = req.params.id;
-    const layout = lylist.find(ly => ly.id === id);
+    const layout = await database.getLayout(id);
     if (layout) {
         res.sendFile(layout.filename, { root: "./assets/layouts" });
     } else {
@@ -46,19 +44,15 @@ router.get("/layouts/:id", (req, res) => {
     }
 });
 
-router.get("/masks/:id", (req, res) => {
+router.get("/masks/:id", async (req, res) => {
     const id = req.params.id;
-    const mask = masks.find(msk => msk.id === id);
+    const mask = await database.getDecoration(id);
     if (mask) {
         res.sendFile(mask.filename, { root: "./assets/masks" });
     }
     if (res.statusCode === 404) {
         console.warn("Mask not found")
     }
-});
-
-router.get("/profileAssets", (req, res) => {
-    res.send({ masks, bglist, lylist });
 });
 
 router.get("/keys/:id", async (req, res) => {
