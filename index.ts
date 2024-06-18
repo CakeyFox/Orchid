@@ -1,5 +1,5 @@
 import express, { Application } from 'express';
-import DatabaseConnection from './services/foxy/Database';
+import DatabaseConnection from './services/foxy/database/DatabaseManager';
 import { logger } from './utils/logger';
 import { RestManager } from './services/foxy/RestManager';
 
@@ -15,6 +15,7 @@ require('dotenv').config();
 app.use('/', require('./routes/RequestHandler'));
 app.use('/', require('./routes/RSOHandler'));
 app.use('/', require('./routes/DBLHandler'));
+app.use('/', require('./routes/PaymentsHandler'));
 
 /* Static Files */
 app.use('/assets', express.static('assets/'));
