@@ -5,4 +5,5 @@ build/
 out/
 package-lock.json
 assets/
+utils/json/products.json
 ```
