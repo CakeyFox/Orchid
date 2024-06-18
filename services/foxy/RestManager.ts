@@ -13,13 +13,17 @@ export class RestManager {
     }
 
     async sendDirectMessage(userId: BigString, data: Object) {
-       const userDM: any = this.rest.runMethod(this.rest, "POST", this.constants.routes.USER_DM(), {
-            recipient_id: userId,
-        });
-
-        return this.rest.runMethod(this.rest, "POST", this.constants.routes.CHANNEL_MESSAGES((await userDM).id), {
-            ...data
-        });
+        try {
+            const userDM: any = this.rest.runMethod(this.rest, "POST", this.constants.routes.USER_DM(), {
+                recipient_id: userId,
+            });
+    
+            return this.rest.runMethod(this.rest, "POST", this.constants.routes.CHANNEL_MESSAGES((await userDM).id), {
+                ...data
+            });
+        } catch (error) {
+            return;
+        }
     }
 
     async getUser(userId: String) {

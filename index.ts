@@ -21,7 +21,7 @@ app.use('/', require('./routes/PaymentsHandler'));
 app.use('/assets', express.static('assets/'));
 
 app.listen(process.env.PORT, () => {
-    logger.info(`[READY] - Server is running at https://localhost:${process.env.PORT}`);
+    logger.info(`[READY] - Server is running at http://localhost:${process.env.PORT}`);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
