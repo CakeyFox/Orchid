@@ -1,5 +1,6 @@
 import { createBotConstants, createRestManager } from "discordeno";
 import { BigString } from "discordeno/types";
+import { logger } from "../../utils/logger";
 require("dotenv").config();
 
 export class RestManager {
@@ -22,7 +23,7 @@ export class RestManager {
                 ...data
             });
         } catch (error) {
-            return;
+            logger.error("Error sending direct message to user. Is DM closed?", error)
         }
     }
 
