@@ -16,7 +16,8 @@ export default class DatabaseConnection {
     public backgrounds: any;
     public decorations: any;
     public layouts: any;
-    
+    public minecraft: any;
+
     constructor() {
         mongoose.set("strictQuery", true)
         mongoose.connect(process.env.MONGODB_URI).catch((error) => {
@@ -32,6 +33,7 @@ export default class DatabaseConnection {
         this.backgrounds = mongoose.model('backgrounds', Schemas.backgroundSchema);
         this.decorations = mongoose.model('decorations', Schemas.avatarDecorationSchema);
         this.layouts = mongoose.model('layouts', Schemas.layoutsSchema);
+        this.minecraft = mongoose.model('minecraft', Schemas.minecraftSchema, 'MinecraftAccounts');
     }
 
     async getUser(userId: String): Promise<any> {
@@ -94,7 +96,10 @@ export default class DatabaseConnection {
                     isPrivate: false,
                     region: null
                 },
-                premiumKeys: []
+                premiumKeys: [],
+                roulette: {
+                    availableSpins: 5,
+                }
             }).save();
         }
 
@@ -118,6 +123,15 @@ export default class DatabaseConnection {
         commandsData.map(command => usageCount += command.commandUsageCount);
         return usageCount;
 
+    }
+
+    async getMinecraftUser(username: string) {
+        let document = await this.minecraft.findOne({ username });
+        if (!document) {
+            return null;
+        }
+
+        return document;
     }
 
     async getGuild(guildId: BigInt): Promise<any> {
