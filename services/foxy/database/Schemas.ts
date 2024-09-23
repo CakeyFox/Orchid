@@ -74,7 +74,10 @@ const userSchema = new mongoose.Schema({
         isPrivate: Boolean,
         region: String
     },
-    premiumKeys: [keySchema]
+    premiumKeys: [keySchema],
+    roulette: {
+        availableSpins: Number,
+    }
 }, { versionKey: false, id: false });
 
 const riotAccountSchema = new mongoose.Schema({
@@ -209,6 +212,11 @@ const badgesSchema = new mongoose.Schema({
     priority: Number,
 });
 
+const minecraftSchema = new mongoose.Schema({
+    username: String,
+    discordId: String
+});
+
 export const Schemas = {
     userSchema,
     guildSchema,
@@ -218,7 +226,8 @@ export const Schemas = {
     keySchema,
     avatarDecorationSchema,
     badgesSchema,
-    layoutsSchema
+    layoutsSchema,
+    minecraftSchema
 };
 
 /* End of bot related schemas */
