@@ -70,4 +70,29 @@ router.get("/keys/:id", async (req, res) => {
     }
 });
 
+router.get("/user/minecraft/:username", async (req, res) => {
+    const { username } = req.params;
+    const auth = req.header("Authorization");
+    if (auth === process.env.AUTHORIZATION) {
+        const minecraftUser = await database.getMinecraftUser(username);
+        if (!minecraftUser) { return res.status(404).send({ error: "User not found" }) }
+        const userFromFoxy = await database.getUser(minecraftUser.discordId);
+
+        return res.send({ status: 200, user: {
+            minecraft: {
+                username: minecraftUser.username
+            },
+            foxy: {
+                id: userFromFoxy._id,
+                isBanned: userFromFoxy.isBanned,
+                banReason: userFromFoxy.banReason,
+                banDate: userFromFoxy.banDate,
+            }
+        }})
+
+    } else {
+        return res.status(401).send({ error: "Invalid key" });
+    }
+});
+
 export = router;
