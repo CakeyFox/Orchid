@@ -4,6 +4,8 @@ import { User } from 'discordeno/transformers';
 import { RestManager } from '../RestManager';
 import { Schemas } from './Schemas';
 import { Background, Decoration, Layout } from '../../../utils/types/profile';
+import cron from 'node-cron';
+import { database } from '../../..';
 const { v4: uuidv4 } = require('uuid');
 const rest = new RestManager();
 
@@ -17,6 +19,7 @@ export default class DatabaseConnection {
     public decorations: any;
     public layouts: any;
     public minecraft: any;
+    public store: any;
 
     constructor() {
         mongoose.set("strictQuery", true)
@@ -34,6 +37,23 @@ export default class DatabaseConnection {
         this.decorations = mongoose.model('decorations', Schemas.avatarDecorationSchema);
         this.layouts = mongoose.model('layouts', Schemas.layoutsSchema);
         this.minecraft = mongoose.model('minecraft', Schemas.minecraftSchema, 'MinecraftAccounts');
+        this.store = mongoose.model('dailyStore', Schemas.dailyStoreSchema);
+
+        cron.schedule('0 0 * * *', async () => {
+            await this.updateStore();
+        });
+
+    }
+
+    async updateStore() {
+        const backgrounds = await database.getAllBackgrounds();
+        const randomBackgrounds = backgrounds.sort(() => Math.random() - Math.random()).slice(0, 6);
+        this.store.findOneAndUpdate({}, {
+            itens: randomBackgrounds,
+            lastUpdate: new Date()
+        }, { upsert: true }).then(() => {
+            logger.info(`[DATABASE] Updated store!`);
+        });
     }
 
     async getUser(userId: String): Promise<any> {
@@ -270,7 +290,7 @@ export default class DatabaseConnection {
         return key;
     }
 
-    
+
     async getAllBackgrounds(): Promise<Background[]> {
         const backgroundsData = await this.backgrounds.find({});
         return backgroundsData.map(background => background.toJSON());

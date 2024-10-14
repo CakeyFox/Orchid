@@ -217,6 +217,16 @@ const minecraftSchema = new mongoose.Schema({
     discordId: String
 });
 
+const itemSchema = new mongoose.Schema({
+    id: String,
+    type: String,
+});
+
+const dailyStoreSchema = new mongoose.Schema({
+    itens: [itemSchema],
+    lastUpdate: Date,
+}, { versionKey: false, id: false });
+
 export const Schemas = {
     userSchema,
     guildSchema,
@@ -227,7 +237,8 @@ export const Schemas = {
     avatarDecorationSchema,
     badgesSchema,
     layoutsSchema,
-    minecraftSchema
+    minecraftSchema,
+    dailyStoreSchema
 };
 
 /* End of bot related schemas */
