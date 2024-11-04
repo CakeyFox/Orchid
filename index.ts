@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import DatabaseConnection from './services/foxy/database/DatabaseManager';
 import { logger } from './utils/logger';
 import { RestManager } from './services/foxy/RestManager';
+import DBLHandler from './routes/DBLHandler';
 
 const app: Application = express();
 const database = new DatabaseConnection();
@@ -14,7 +15,7 @@ require('dotenv').config();
 /* Route Handlers */
 app.use('/', require('./routes/RequestHandler'));
 app.use('/', require('./routes/RSOHandler'));
-app.use('/', require('./routes/DBLHandler'));
+app.use('/', new DBLHandler().getRouter());
 app.use('/', require('./routes/PaymentsHandler'));
 
 /* Static Files */

@@ -42,18 +42,66 @@ export default class DatabaseConnection {
         cron.schedule('0 0 * * *', async () => {
             await this.updateStore();
         });
-
     }
 
     async updateStore() {
-        const backgrounds = await database.getAllBackgrounds();
-        const randomBackgrounds = backgrounds.sort(() => Math.random() - Math.random()).slice(0, 6);
-        this.store.findOneAndUpdate({}, {
-            itens: randomBackgrounds,
-            lastUpdate: new Date()
-        }, { upsert: true }).then(() => {
+        try {
+            const [backgrounds, decorations] = await Promise.all([
+                database.getAllBackgrounds(),
+                database.getAllDecorations()
+            ]);
+            const validBackgrounds = this.filterValidItems(backgrounds);
+            const validDecorations = this.filterValidItems(decorations);
+
+            if (validBackgrounds.length < 6 || validDecorations.length < 2) {
+                logger.warn(`[DATABASE] Not enough valid items! ${validBackgrounds.length} backgrounds and ${validDecorations.length} decorations. Updating anyway...`);
+            }
+
+            const randomBackgrounds = this.getRandomItemsWithType(validBackgrounds, 6, 'background');
+            const randomDecorations = this.getRandomItemsWithType(validDecorations, 2, 'decoration');
+            const allItems = [...randomBackgrounds, ...randomDecorations];
+
+            await this.store.findOneAndUpdate(
+                {},
+                { itens: allItems, lastUpdate: new Date() },
+                { upsert: true }
+            );
+
             logger.info(`[DATABASE] Updated store!`);
-        });
+        } catch (error) {
+            logger.error(`[DATABASE] Failed to update store: ${error}`);
+        }
+    }
+
+    filterValidItems(items) {
+        return items.filter(item => !item.inactive && item.cakes > 0);
+    }
+
+    async getExpiredVotes(): Promise<any> {
+        const currentTime = new Date(); 
+        const expirationTime = new Date(currentTime.getTime() - (12 * 60 * 60 * 1000)); 
+    
+        try {
+            const expiredVotes = await this.user.find({
+                lastVote: { $lt: expirationTime },
+                notifiedForVote: false
+            });
+        
+            return expiredVotes; 
+        } catch (error) {
+            logger.error("Error fetching expired votes:", error); 
+            throw error;
+        }
+    }
+    
+    
+    
+    
+    
+
+    getRandomItemsWithType(array, count, type) {
+        const shuffled = array.slice().sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count).map(item => ({ ...item, type }));
     }
 
     async getUser(userId: String): Promise<any> {
@@ -119,7 +167,7 @@ export default class DatabaseConnection {
                 premiumKeys: [],
                 roulette: {
                     availableSpins: 5,
-                }
+                },
             }).save();
         }
 
