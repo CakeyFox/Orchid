@@ -112,19 +112,6 @@ const guildSchema = new mongoose.Schema({
         joinChannel: String,
         leaveChannel: String,
     },
-    valAutoRoleModule: {
-        isEnabled: Boolean,
-        unratedRole: String,
-        ironRole: String,
-        bronzeRole: String,
-        silverRole: String,
-        goldRole: String,
-        platinumRole: String,
-        diamondRole: String,
-        ascendantRole: String,
-        immortalRole: String,
-        radiantRole: String,
-    },
     premiumKeys: [keySchemaForGuilds]
 }, { versionKey: false, id: false });
 

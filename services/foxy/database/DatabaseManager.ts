@@ -1,13 +1,10 @@
 import mongoose from 'mongoose';
 import { logger } from '../../../utils/logger';
-import { User } from 'discordeno/transformers';
-import { RestManager } from '../RestManager';
 import { Schemas } from './Schemas';
 import { Background, Decoration, Layout } from '../../../utils/types/profile';
 import cron from 'node-cron';
 import { database } from '../../..';
 const { v4: uuidv4 } = require('uuid');
-const rest = new RestManager();
 
 export default class DatabaseConnection {
     public key: any;
@@ -46,12 +43,14 @@ export default class DatabaseConnection {
 
     async updateStore() {
         try {
-            const [backgrounds, decorations] = await Promise.all([
+            const [backgrounds, decorations, layouts] = await Promise.all([
                 database.getAllBackgrounds(),
-                database.getAllDecorations()
+                database.getAllDecorations(),
+                database.getAllLayouts()
             ]);
             const validBackgrounds = this.filterValidItems(backgrounds);
             const validDecorations = this.filterValidItems(decorations);
+            const validLayouts = layouts
 
             if (validBackgrounds.length < 6 || validDecorations.length < 2) {
                 logger.warn(`[DATABASE] Not enough valid items! ${validBackgrounds.length} backgrounds and ${validDecorations.length} decorations. Updating anyway...`);
@@ -59,7 +58,9 @@ export default class DatabaseConnection {
 
             const randomBackgrounds = this.getRandomItemsWithType(validBackgrounds, 6, 'background');
             const randomDecorations = this.getRandomItemsWithType(validDecorations, 2, 'decoration');
-            const allItems = [...randomBackgrounds, ...randomDecorations];
+            const randomLayouts = this.getRandomItemsWithType(validLayouts, 3, 'layout');
+
+            const allItems = [...randomBackgrounds, ...randomDecorations, ...randomLayouts];
 
             await this.store.findOneAndUpdate(
                 {},
@@ -93,11 +94,6 @@ export default class DatabaseConnection {
             throw error;
         }
     }
-    
-    
-    
-    
-    
 
     getRandomItemsWithType(array, count, type) {
         const shuffled = array.slice().sort(() => Math.random() - 0.5);
@@ -105,70 +101,10 @@ export default class DatabaseConnection {
     }
 
     async getUser(userId: String): Promise<any> {
-        if (!userId) null;
-        const user: User = await rest.getUser(userId);
-        let document = await this.user.findOne({ _id: user.id });
-
+        const document = await this.user.findOne({ _id: userId });
+        console.log(document)
         if (!document) {
-            document = new this.user({
-                _id: user.id,
-                userCreationTimestamp: new Date(),
-                isBanned: false,
-                banDate: null,
-                banReason: null,
-                userCakes: {
-                    balance: 0,
-                    lastDaily: null,
-                },
-                marryStatus: {
-                    marriedWith: null,
-                    marriedDate: null,
-                    cantMarry: false,
-                },
-                userProfile: {
-                    decoration: null,
-                    decorationList: [],
-                    background: "default",
-                    backgroundList: ["default"],
-                    repCount: 0,
-                    lastRep: null,
-                    layout: "default",
-                    aboutme: null,
-                },
-                userPremium: {
-                    premium: false,
-                    premiumDate: null,
-                    premiumType: null,
-                },
-                userSettings: {
-                    language: 'pt-br'
-                },
-                petInfo: {
-                    name: null,
-                    type: null,
-                    rarity: null,
-                    level: 0,
-                    hungry: 100,
-                    happy: 100,
-                    health: 100,
-                    lastHungry: null,
-                    lastHappy: null,
-                    isDead: false,
-                    isClean: true,
-                    food: []
-                },
-                userTransactions: [],
-                riotAccount: {
-                    isLinked: false,
-                    puuid: null,
-                    isPrivate: false,
-                    region: null
-                },
-                premiumKeys: [],
-                roulette: {
-                    availableSpins: 5,
-                },
-            }).save();
+            return null;
         }
 
         return document;
