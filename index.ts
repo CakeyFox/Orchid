@@ -14,7 +14,6 @@ require('dotenv').config();
 
 /* Route Handlers */
 app.use('/', require('./routes/RequestHandler'));
-app.use('/', new DBLHandler().getRouter());
 
 /* Static Files */
 app.use('/assets', express.static('assets/'));
